@@ -1,0 +1,10 @@
+identifier: maru.cider-suite
+name: Maru Suite
+description: Authentic Windows 10 Acrylic UI, Apple Music dynamic scroll header, and synchronized Romaji lyrics.
+version: 1.0.0
+author: Maru & Nanami
+ce_prefix: maru
+pluginKitVersion: 4.0.0
+entry:
+  plugin.js:
+    type: main

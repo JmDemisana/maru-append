@@ -1,0 +1,603 @@
+/**
+ * Windows 10 Groove Music & Acrylic Theme for Cider 4
+ * Authors: Maru & Nanami
+ * Authentic Windows 10 Fluent / Groove Music styling:
+ * - Flattened top navigation and toolbars (NO rounded capsules or glazes)
+ * - Hardware-accelerated <=2px hover lifts & nudges
+ * - Protected icon fonts (NO tofu squares on buttons or table headers)
+ * - Windows 10 buttons: #0078d7 blue for Primary, dark neutral tiles for Secondary
+ * - Flat acrylic surfaces (NO gaussian blur banners)
+ * - Strict 0px sharp geometry on all tiles, buttons, and artwork
+ * - Clean lyrics view without colliding borders
+ */
+
+/* ==========================================================================
+   1. COLOR PALETTE & DESIGN TOKENS
+   ========================================================================== */
+:root {
+  /* Windows 10 Color Palette */
+  --w10-bg: #181818 !important;
+  --w10-sidebar: #141414 !important;
+  --w10-player: #1e1e1e !important;
+  --w10-surface: #202020 !important;
+  --w10-surface-hover: rgba(255, 255, 255, 0.08) !important;
+  --w10-border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  --w10-border-hover: 1px solid rgba(255, 255, 255, 0.32) !important;
+  --w10-accent: #0078d7 !important;
+
+  /* Kill Cider's purple accent variables */
+  --keyColor: #0078d7 !important;
+  --musicKeyColor: #0078d7 !important;
+  --cbtn-shade: transparent !important;
+
+  /* Geometry - Pure Metro 0px */
+  --genericBorderRadius: 0px !important;
+  --mediaItemRadiusMedium: 0px !important;
+  --mediaItemRadiusSmall: 0px !important;
+  --mediaItemRadiusLarge: 0px !important;
+  --radius: 0px !important;
+  --borderRadius: 0px !important;
+  --q-card-border-radius: 0px !important;
+  --windowBorderRadius: 0px !important;
+  --chromeButtonRadius: 0px !important;
+
+  /* Snappy Windows transitions */
+  --ease_appleSpring: cubic-bezier(0.1, 0.9, 0.2, 1) !important;
+}
+
+/* ==========================================================================
+   2. APP SHELL & LAYOUT (NO GAUSSIAN BLUR BANNER)
+   ========================================================================== */
+body,
+#app-viewport,
+.q-layout,
+.q-page-container {
+  background-color: var(--w10-bg) !important;
+  color: #eeeeee !important;
+}
+
+.top-blurmap,
+.blurmap-container,
+.blurmap,
+.blurmap-preview,
+.liquid-transition-canvas,
+cider-immersive-backdrop,
+.backdrop-canvas,
+.app-backdrop canvas,
+#app-viewport canvas.ambient-canvas,
+.ambient-canvas,
+canvas.ambient-canvas,
+.ambient-lighting,
+.app-blurred {
+  display: none !important;
+  visibility: hidden !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+}
+
+.q-page,
+.playlist-page,
+.album-page,
+.artist-page {
+  background-color: var(--w10-bg) !important;
+}
+
+/* ==========================================================================
+   3. FLATTEN TOP NAVIGATION & EXTENSION TOOLBAR CAPSULES (CIRCLED IN YELLOW)
+   ========================================================================== */
+.chrome-top .nav-flipper,
+.chrome-top .chrome-button-group,
+.chrome-top .chrome-button,
+.nav-flipper,
+.chrome-button-group,
+.chrome-button,
+.im-toolbar .nav-flipper,
+.im-toolbar .chrome-button-group,
+.im-toolbar .chrome-button,
+.chrome-button .chrome-button-fill {
+  border-radius: 0px !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Eliminate rounded glaze capsule backgrounds */
+.nav-flipper:before,
+.nav-flipper:after,
+.chrome-button-group:before,
+.chrome-button-group:after,
+.chrome-button:before,
+.chrome-button:after,
+.im-toolbar .nav-flipper:before,
+.im-toolbar .nav-flipper:after,
+.im-toolbar .chrome-button-group:before,
+.im-toolbar .chrome-button-group:after,
+.im-toolbar .chrome-button:before,
+.im-toolbar .chrome-button:after {
+  display: none !important;
+}
+
+/* Individual clean Windows 10 flat square titlebar buttons */
+.chrome-button,
+.nav-flipper button,
+.chrome-button-group button,
+.chrome-top button {
+  border-radius: 0px !important;
+  width: 34px !important;
+  height: 32px !important;
+  color: #cccccc !important;
+  background: transparent !important;
+  border: none !important;
+  transition: background-color 100ms ease, color 100ms ease !important;
+}
+
+.chrome-button:hover,
+.nav-flipper button:hover,
+.chrome-button-group button:hover,
+.chrome-top button:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+}
+
+.chrome-button:active,
+.nav-flipper button:active,
+.chrome-button-group button:active,
+.chrome-top button:active {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Center Dynamic Scroll Title (Apple Music mobile style) */
+.chrome-top {
+  position: relative !important;
+}
+
+.maru-chrome-title {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  color: #ffffff !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 44vw !important;
+  transition: opacity 160ms ease !important;
+  z-index: 999999 !important;
+  user-select: none !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9) !important;
+}
+
+.maru-chrome-title.visible {
+  opacity: 1 !important;
+}
+
+
+/* ==========================================================================
+   4. WINDOWS 10 BUTTONS (TACTILE NUDGES & NO PURPLE)
+   ========================================================================== */
+.c-btn,
+.c-btn--surface,
+.round,
+.round > .c-btn--surface,
+.square > .c-btn--surface,
+.c-btn--surface:before,
+.c-btn--surface:after,
+.hero-cta,
+.hero-play-btn,
+.q-btn,
+.q-btn--round,
+.q-btn--rounded,
+.q-btn:before,
+.q-btn:after,
+button {
+  border-radius: 0px !important;
+}
+
+/* Smooth compositor transition for all button nudges */
+.c-btn,
+.c-btn--surface,
+.hero-cta,
+.hero-play-btn,
+.q-btn,
+.album-actions button,
+.playlist-actions button {
+  transition: transform 100ms cubic-bezier(0.1, 0.9, 0.2, 1), background-color 100ms ease, border-color 100ms ease !important;
+}
+
+/* Button Hover Nudge: gentle -1.5px lift */
+.c-btn:hover:not(:disabled),
+.c-btn--surface:hover,
+.hero-cta:hover,
+.hero-play-btn:hover,
+.q-btn:hover:not(:disabled) {
+  transform: translateY(-1.5px) !important;
+}
+
+/* Button Click: responsive depression */
+.c-btn:active:not(:disabled),
+.c-btn--surface:active,
+.hero-cta:active,
+.hero-play-btn:active,
+.q-btn:active:not(:disabled) {
+  transform: translateY(0.5px) !important;
+}
+
+/* Secondary Buttons (Shuffle, Edit, Repeat, More, etc.): Neutral Windows 10 Dark Tile */
+.c-btn--surface,
+.round > .c-btn--surface,
+.hero-cta .c-btn--surface,
+.album-actions .c-btn--surface,
+.playlist-actions .c-btn--surface {
+  background: rgba(255, 255, 255, 0.08) !important;
+  background-image: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.c-btn--surface:hover,
+.round > .c-btn--surface:hover,
+.hero-cta .c-btn--surface:hover,
+.album-actions .c-btn--surface:hover,
+.playlist-actions .c-btn--surface:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.38) !important;
+}
+
+/* Primary Button (Play): Classic Windows 10 Blue #0078d7 */
+.hero-play-btn .c-btn--surface,
+.action-btn.primary .c-btn--surface,
+.c-btn.primary .c-btn--surface,
+button[aria-label*="Play"] .c-btn--surface {
+  background: #0078d7 !important;
+  background-image: none !important;
+  border: 1px solid #0078d7 !important;
+  color: #ffffff !important;
+}
+
+.hero-play-btn .c-btn--surface:hover,
+.action-btn.primary .c-btn--surface:hover,
+.c-btn.primary .c-btn--surface:hover,
+button[aria-label*="Play"] .c-btn--surface:hover {
+  background: #1984d8 !important;
+  border-color: #1984d8 !important;
+}
+
+/* Remove purple glaze pseudo-elements */
+.c-btn--surface:before,
+.c-btn--surface:after {
+  display: none !important;
+}
+
+/* Chips, Badges, Toggles (Windows 10 Metro Style) */
+.c-switch,
+.c-switch__track,
+.c-switch__thumb,
+.q-checkbox__bg,
+.q-chip,
+.q-badge,
+.c-badge,
+.c-pill,
+.hero-badge,
+.release-year-badge,
+.track-pill,
+kbd {
+  border-radius: 0px !important;
+}
+
+.c-switch.checked .c-switch__track,
+.q-checkbox[aria-checked="true"] .q-checkbox__bg {
+  background: #0078d7 !important;
+  border-color: #0078d7 !important;
+}
+
+/* ==========================================================================
+   5. SIDEBAR (TACTILE HORIZONTAL NUDGE)
+   ========================================================================== */
+.q-drawer,
+.navigation-drawer,
+cider-sidebar,
+aside {
+  background: var(--w10-sidebar) !important;
+  border-right: var(--w10-border) !important;
+}
+
+.q-item,
+[sfc-name="NavigationButton"],
+.nav-btn {
+  margin: 1px 0 !important;
+  padding: 8px 14px !important;
+  border-radius: 0px !important;
+  border-left: 3px solid transparent !important;
+  background-color: transparent !important;
+  color: #b5b5b5 !important;
+  font-size: 13.5px !important;
+  transition: background-color 100ms ease, color 100ms ease, transform 100ms ease !important;
+}
+
+/* Sidebar hover nudge: subtle 2px right shift */
+.q-item:hover,
+[sfc-name="NavigationButton"]:hover,
+.nav-btn:hover {
+  background-color: var(--w10-surface-hover) !important;
+  color: #ffffff !important;
+  transform: translateX(2px) !important;
+}
+
+.q-item:active,
+[sfc-name="NavigationButton"]:active,
+.nav-btn:active {
+  transform: translateX(0px) !important;
+}
+
+/* Active navigation item */
+.q-item.q-router-link--active,
+.q-item.active,
+.q-item.q-item--active,
+[sfc-name="NavigationButton"].active {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-left: 3px solid var(--w10-accent) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+/* Sharp playlist thumbnails & avatars in sidebar */
+.playlist-art,
+.playlist-art img,
+.playlist-card,
+.sidebar_nav-btn,
+.q-avatar,
+.q-avatar img,
+.q-avatar > div,
+.q-item__section--avatar,
+.q-item__section--avatar img,
+.q-item__section--avatar .q-icon,
+.drawer-content img,
+.navigation-drawer img,
+cider-sidebar img,
+aside img,
+.user-profile,
+.user-profile img,
+.user-avatar,
+.user-avatar img,
+.profile-card,
+.profile-chip {
+  border-radius: 0px !important;
+}
+
+.playlist-art--folder {
+  background: transparent !important;
+}
+
+/* Search input on top left */
+.q-field--outlined .q-field__control,
+header input[type="search"],
+input[type="search"] {
+  border-radius: 0px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+}
+
+/* ==========================================================================
+   6. MEDIA TILES & ALBUM SHELVES (SIGNATURE <=2PX HOVER LIFT)
+   ========================================================================== */
+.shelf-artwork,
+.item-artwork,
+.artwork-container,
+.artwork {
+  border-radius: 0px !important;
+  border: var(--w10-border) !important;
+  box-shadow: none !important;
+  transition: transform 120ms cubic-bezier(0.1, 0.9, 0.2, 1), border-color 120ms ease !important;
+}
+
+/* Signature 2px lift + crisp reveal border highlight */
+.shelf-artwork:hover,
+.item-artwork:hover,
+.artwork-container:hover {
+  transform: translateY(-2px) !important;
+  border: var(--w10-border-hover) !important;
+}
+
+.shelf-artwork:active,
+.item-artwork:active,
+.artwork-container:active {
+  transform: translateY(0px) !important;
+}
+
+.shelf-artwork img,
+.item-artwork img,
+.artwork img,
+.q-img__image {
+  border-radius: 0px !important;
+}
+
+/* ==========================================================================
+   7. TRACKLIST TABLE (TACTILE ROW HIGHLIGHT)
+   ========================================================================== */
+.track-artwork,
+.track-art,
+.q-table img,
+.ri-list-item img,
+.c-listitem img,
+.tracklist-item img {
+  border-radius: 0px !important;
+  box-shadow: none !important;
+}
+
+.tracklist-header,
+.q-table th {
+  color: #888888 !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+}
+
+.q-table tr {
+  border-radius: 0px !important;
+  transition: background-color 100ms ease, transform 100ms ease !important;
+}
+
+/* Subtle track row hover */
+.q-table tbody tr:hover {
+  background-color: var(--w10-surface-hover) !important;
+}
+
+/* Pagination buttons */
+.q-pagination {
+  gap: 4px !important;
+}
+
+.q-pagination .q-btn {
+  min-width: 32px !important;
+  height: 32px !important;
+  padding: 0 6px !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-radius: 0px !important;
+}
+
+.q-pagination .q-btn.bg-primary {
+  background: #0078d7 !important;
+  border-color: #0078d7 !important;
+}
+
+/* ==========================================================================
+   8. NOW PLAYING BAR (GROOVE MUSIC ACRYLIC)
+   ========================================================================== */
+cider-lcdplayer-glass,
+.lcd-player-glass,
+.q-footer,
+cider-player,
+#player-bar {
+  background: var(--w10-player) !important;
+  border-top: var(--w10-border) !important;
+  backdrop-filter: blur(20px) !important;
+}
+
+.lcd-player-glass img,
+cider-lcdplayer-glass img {
+  border-radius: 0px !important;
+  border: var(--w10-border) !important;
+}
+
+input[type="range"] {
+  accent-color: var(--w10-accent) !important;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  border-radius: 0px !important;
+  width: 8px !important;
+  height: 16px !important;
+  background: #ffffff !important;
+  border: 1px solid #222222 !important;
+}
+
+/* ==========================================================================
+   9. LYRICS VIEW (NO COLLIDING LEFT BORDER LINE)
+   ========================================================================== */
+.lyric-line {
+  border-left: none !important;
+  border: none !important;
+  border-radius: 0px !important;
+  padding: 8px 16px !important;
+  color: #888888 !important;
+  opacity: 0.45 !important;
+  transition: color 150ms ease, opacity 150ms ease !important;
+}
+
+.lyric-line:hover {
+  opacity: 0.75 !important;
+  color: #dddddd !important;
+}
+
+.lyric-line.active {
+  border-left: none !important;
+  border: none !important;
+  background: transparent !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+  font-weight: 600 !important;
+}
+
+.lyric-line .q-spinner,
+.lyric-line .dots,
+.interlude-dots,
+.interlude-dots span {
+  border-radius: 50% !important;
+}
+
+/* ==========================================================================
+   10. APPLE MUSIC DYNAMIC SCROLL HEADER & LYRICS SUBTITLES
+   ========================================================================== */
+.chrome-top {
+  position: relative !important;
+  transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease !important;
+}
+
+body.body--dark .chrome-top.has-scrolled-title,
+.body--dark .chrome-top.has-scrolled-title,
+.chrome-top.has-scrolled-title {
+  background-color: #181818 !important;
+  background: #181818 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5) !important;
+}
+
+.maru-chrome-title {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -15px) !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  color: #ffffff !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 44vw !important;
+  transition: opacity 180ms ease, transform 180ms cubic-bezier(0.1, 0.9, 0.2, 1) !important;
+  z-index: 999999 !important;
+  user-select: none !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9) !important;
+}
+
+.maru-chrome-title.visible {
+  opacity: 1 !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+.maru-romaji-subtitle {
+  display: block !important;
+  font-size: 0.58em !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em !important;
+  line-height: 1.35 !important;
+  opacity: 0.72 !important;
+  margin-top: 3px !important;
+  color: #cfd8dc !important;
+  pointer-events: none !important;
+  transition: color 120ms ease, opacity 120ms ease !important;
+}
+
+.lyric-line:hover .maru-romaji-subtitle {
+  opacity: 0.88 !important;
+  color: #ffffff !important;
+}
+
+.lyric-line.active .maru-romaji-subtitle {
+  opacity: 1 !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+

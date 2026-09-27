@@ -1,0 +1,8 @@
+name: Windows 10 Acrylic
+author: Maru & Nanami
+description: Windows 10 Fluent Design with Acrylic surfaces, crisp Metro live tiles, 0px border radius, and lightweight resource optimization for potato PCs.
+version: 1.0.0
+stylesheets:
+  - file: main.css
+    name: Windows 10 Acrylic (Metro Tiles)
+    description: Sharp geometry, Segoe UI typography, lightweight acrylic glass, and high-performance rendering.
