@@ -244,6 +244,26 @@ body.body--dark .chrome-top.has-scrolled-title,
   color: #ffffff !important;
   font-weight: 600 !important;
 }
+
+/* Hide Playlist & Album Header Pills */
+.smart-meta,
+.smart-meta__pill,
+.meta-chip,
+.meta-chips,
+.item-tags,
+.playlist-tags,
+.header-meta .meta-chip,
+.container-detail .meta-chip,
+.container-detail .smart-meta,
+.container-detail .item-tags,
+.container-detail .tags,
+.container-detail .chips,
+[sfc-name="Playlist"] .smart-meta,
+[sfc-name="Playlist"] .meta-chip,
+[sfc-name="Playlist"] .item-tags,
+[sfc-name="Playlist"] .tags {
+  display: none !important;
+}
 `;
 
 class MaruSuite {
@@ -258,6 +278,7 @@ class MaruSuite {
     this.setupDynamicScrollHeader();
     this.setupRomajiLyrics();
     this.setupPlaybackWatcher();
+    this.setupPillRemover();
     document.documentElement.dataset.maruPlugin = 'active';
   }
 
@@ -563,6 +584,53 @@ class MaruSuite {
 
     bindAudioEvents();
     setInterval(bindAudioEvents, 2000);
+  }
+
+  /* --------------------------------------------------------------------------
+     FEATURE 4: HIDE PLAYLIST / ALBUM HEADER PILLS
+     -------------------------------------------------------------------------- */
+  setupPillRemover() {
+    const purgePills = () => {
+      // 1. Selector-based hiding
+      const selectors = [
+        '.smart-meta',
+        '.smart-meta__pill',
+        '.meta-chip',
+        '.meta-chips',
+        '.item-tags',
+        '.playlist-tags',
+        '.container-detail .meta-chip',
+        '.container-detail .smart-meta',
+        '.container-detail .item-tags',
+        '[sfc-name="Playlist"] .smart-meta',
+        '[sfc-name="Playlist"] .meta-chip'
+      ];
+      selectors.forEach(sel => {
+        document.querySelectorAll(sel).forEach(el => {
+          if (!el.closest('.settings, aside, .q-drawer')) {
+            el.style.setProperty('display', 'none', 'important');
+          }
+        });
+      });
+
+      // 2. Generic sibling inspection immediately below playlist/album heading
+      const headings = document.querySelectorAll(
+        '.container-detail h1, .header-card h1, .item-info h1, [sfc-name="Playlist"] h1, h1.apple-heading'
+      );
+      headings.forEach(h => {
+        let el = h.nextElementSibling;
+        while (el && !el.matches('.description, .item-description, .actions-bar, .buttons, .playlist-actions, .listitem-scaffold, .tracks-container, table')) {
+          const txt = el.textContent || '';
+          if (txt.includes('TRACKS') || txt.includes('PERSONAL MIX') || txt.includes('TODAY') || el.classList.contains('smart-meta') || el.classList.contains('meta-chip') || el.querySelector('.smart-meta__pill, .meta-chip, [class*="chip"], [class*="pill"]')) {
+            el.style.setProperty('display', 'none', 'important');
+          }
+          el = el.nextElementSibling;
+        }
+      });
+    };
+
+    purgePills();
+    setInterval(purgePills, 300);
   }
 }
 

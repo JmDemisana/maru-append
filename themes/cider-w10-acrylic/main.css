@@ -644,3 +644,25 @@ body.body--dark .chrome-top.has-scrolled-title,
   background-color: #ffffff !important;
 }
 
+/* ==========================================================================
+   12. HIDE PLAYLIST / ALBUM HEADER PILLS
+   ========================================================================== */
+.smart-meta,
+.smart-meta__pill,
+.meta-chip,
+.meta-chips,
+.item-tags,
+.playlist-tags,
+.header-meta .meta-chip,
+.container-detail .meta-chip,
+.container-detail .smart-meta,
+.container-detail .item-tags,
+.container-detail .tags,
+.container-detail .chips,
+[sfc-name="Playlist"] .smart-meta,
+[sfc-name="Playlist"] .meta-chip,
+[sfc-name="Playlist"] .item-tags,
+[sfc-name="Playlist"] .tags {
+  display: none !important;
+}
+
