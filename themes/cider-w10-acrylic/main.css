@@ -712,14 +712,55 @@ input[type="search"],
 }
 
 /* ==========================================================================
+   14B. SHELF ARROW BUTTONS: REMOVE HOVER CIRCLE (FLAT WINDOWS 10 METRO)
+   ========================================================================== */
+.slider-header button,
+.slider-header .q-btn,
+.slider-header .c-btn,
+.navbtn,
+.navbtn-lg,
+.v-hl-btn-prev,
+.v-hl-btn-next,
+[class*="slider"] button,
+button:has(svg[data-icon*="chevron" i]),
+button:has(.q-icon[name*="chevron" i]),
+.q-btn:has([name*="chevron" i]) {
+  border-radius: 0px !important;
+  --q-btn-border-radius: 0px !important;
+}
+
+.slider-header button::before,
+.slider-header button::after,
+.slider-header .q-focus-helper,
+.navbtn::before,
+.navbtn::after,
+.navbtn-lg::before,
+.navbtn-lg::after,
+button:has(svg[data-icon*="chevron" i])::before,
+button:has(svg[data-icon*="chevron" i])::after,
+.q-btn:has([name*="chevron" i])::before,
+.q-btn:has([name*="chevron" i])::after,
+.q-btn:has([name*="chevron" i]) .q-focus-helper {
+  border-radius: 0px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.slider-header button:hover,
+.navbtn:hover,
+.navbtn-lg:hover,
+button:has(svg[data-icon*="chevron" i]):hover,
+.q-btn:has([name*="chevron" i]):hover {
+  border-radius: 0px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ==========================================================================
    15. POWERSWOOSH: SAME WIDTH AS SQUARE ALBUMS (260px), HEIGHT ADJUSTS TO ASPECT RATIO
    (Top Picks for You / Playlists Made for You / Find Your Mood / Replay)
    ========================================================================== */
-.item-shelf:has(.powerswoosh),
-.mediaitem-shelf-content:has(.powerswoosh),
-.shelf:has(.powerswoosh) {
+.mediaitem-shelf-content:has(.powerswoosh) {
   min-height: 365px !important;
-  align-items: center !important;
 }
 
 .powerswoosh {
@@ -729,7 +770,6 @@ input[type="search"],
   flex: 0 0 260px !important;
   height: auto !important;
   aspect-ratio: 1 / 1;
-  align-self: center !important;
   position: relative !important;
   overflow: hidden !important;
   border-radius: 0px !important;
