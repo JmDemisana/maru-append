@@ -196,7 +196,7 @@ body.body--dark .chrome-top.has-scrolled-title,
 
 .maru-chrome-title {
   position: absolute !important;
-  left: 124px !important;
+  left: 152px !important;
   top: 50% !important;
   transform: translateY(-50%) translateX(-8px) !important;
   font-size: 13.5px !important;
