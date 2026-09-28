@@ -712,39 +712,90 @@ input[type="search"],
 }
 
 /* ==========================================================================
-   POWERSWOOSH PORTRAIT GRADIENT OVERLAY
-   (Top Picks for You / Playlists Made for You / Replay)
-   Non-destructive: only touches chin background & text, NOT artwork layout.
+   POWERSWOOSH: AUTHENTIC WINDOWS 10 260px SQUARE TILES
+   (Top Picks for You / Playlists Made for You / Find Your Mood / Replay)
    ========================================================================== */
-
-/* Chin / lockup-detail: gradient background so text is always readable */
-.powerswoosh .powerswoosh-chin,
-.powerswoosh .powerswoosh-lockup-detail {
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.96) 0%,
-    rgba(0, 0, 0, 0.80) 45%,
-    rgba(0, 0, 0, 0.30) 80%,
-    transparent 100%
-  ) !important;
-  padding: 36px 14px 14px 14px !important;
+.powerswoosh {
+  --swoosh-floor: 260px !important;
+  --swoosh-ceil: 260px !important;
+  --swoosh-ideal: 260px !important;
+  width: 260px !important;
+  height: 260px !important;
+  min-width: 260px !important;
+  max-width: 260px !important;
+  min-height: 260px !important;
+  max-height: 260px !important;
+  flex: 0 0 260px !important;
+  aspect-ratio: 1 / 1 !important;
+  position: relative !important;
+  overflow: hidden !important;
+  border-radius: 0px !important;
+  border: var(--w10-border) !important;
+  box-shadow: none !important;
+  display: inline-block !important;
   box-sizing: border-box !important;
 }
 
-/* All text: crisp white with strong double shadow */
+.powerswoosh .powerswoosh-artwork,
+.powerswoosh .plattered-artwork,
+.powerswoosh .plattered-artwork-container {
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
+  position: absolute !important;
+  inset: 0 !important;
+  border-radius: 0px !important;
+  overflow: hidden !important;
+}
+
+.powerswoosh .powerswoosh-artwork img,
+.powerswoosh .plattered-artwork img,
+.powerswoosh img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  border-radius: 0px !important;
+}
+
+/* Chin: Progressive Black Overlay (Windows 10 Metro Tile) */
+.powerswoosh .powerswoosh-chin,
+.powerswoosh .powerswoosh-lockup-detail {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 5 !important;
+  padding: 55px 14px 13px 14px !important;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.98) 0%,
+    rgba(0, 0, 0, 0.88) 35%,
+    rgba(0, 0, 0, 0.45) 70%,
+    transparent 100%
+  ) !important;
+  pointer-events: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-end !important;
+  max-height: none !important;
+  box-sizing: border-box !important;
+}
+
 .powerswoosh .powerswoosh-chin *,
 .powerswoosh .powerswoosh-lockup-detail * {
   color: #ffffff !important;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 1), 0 2px 14px rgba(0, 0, 0, 0.9) !important;
+  pointer-events: auto !important;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 1), 0 2px 14px rgba(0, 0, 0, 0.95) !important;
 }
 
-/* Title */
 .powerswoosh .powerswoosh-chin .item-name,
 .powerswoosh .powerswoosh-lockup-detail .item-name,
 .powerswoosh .powerswoosh-title,
 .powerswoosh-chin-title {
   font-size: 13.5px !important;
-  font-weight: 700 !important;
+  font-weight: 600 !important;
   line-height: 1.25 !important;
   display: -webkit-box !important;
   -webkit-line-clamp: 2 !important;
@@ -753,7 +804,6 @@ input[type="search"],
   white-space: normal !important;
 }
 
-/* Subtitle */
 .powerswoosh .powerswoosh-chin .artistLink,
 .powerswoosh .powerswoosh-lockup-detail .artistLink,
 .powerswoosh .powerswoosh-subtitle,
@@ -765,6 +815,7 @@ input[type="search"],
   overflow: hidden !important;
   text-overflow: ellipsis !important;
 }
+
 
 /* ==========================================================================
    7. TRACKLIST TABLE (TACTILE ROW HIGHLIGHT)
@@ -833,26 +884,66 @@ cider-lcdplayer-glass img {
   border-radius: 4px !important;
 }
 
-/* Eliminate Title Cutoff when there is empty space */
+/* Eliminate Title Cutoff & Shift Controls Right */
+.lcdplayer-top {
+  display: flex !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  gap: 16px !important;
+  padding: 0 24px !important;
+}
+
 .lcdplayer-info,
 .lcdplayer-info[data-v-e06d297a],
 .lcdplayer-info .amp-lcd-container,
 .player-info,
+.player,
 .c-metadata,
 .c-metadata .metadata-text {
-  max-width: 580px !important;
+  max-width: none !important;
   width: auto !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  position: relative !important;
+  left: 0 !important;
+  transform: none !important;
+  margin: 0 !important;
+}
+
+.c-metadata {
+  display: flex !important;
+  align-items: center !important;
+  max-width: none !important;
+  width: auto !important;
+}
+
+.c-metadata .metadata-text {
+  max-width: none !important;
+  min-width: 0 !important;
 }
 
 .c-metadata .song-name,
 .c-metadata .release-info {
-  max-width: 520px !important;
+  max-width: none !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: nowrap !important;
 }
 
 .c-metadata.title-overflows .song-name,
 .c-metadata.subtitle-overflows .release-info {
   -webkit-mask-image: none !important;
   mask-image: none !important;
+}
+
+/* Move controls & right side to the free space on the right */
+.lcdplayer-controls {
+  margin-left: auto !important;
+  flex-shrink: 0 !important;
+}
+
+.lcdplayer-side {
+  flex-shrink: 0 !important;
 }
 
 input[type="range"] {
@@ -1069,55 +1160,20 @@ aside .search-widget,
 }
 
 /* ==========================================================================
-   RAG TRACKLIST: Fix Even-Row Centering & Song Name Truncation
+   RAG TRACKLIST: Single Column Stack (Eliminate Even Song Row Stagger)
    ========================================================================== */
-/* Force all track rows to left-align, no centering */
-.rag-tracks,
-.rag-tracks > *,
-.rag-tracks .rag-track,
-.rag-tracks .c-listitem-short,
-.rag-tracks [class*="track"],
-.rag-content .rag-tracks,
-rich-album-grid-details .rag-tracks > * {
-  text-align: left !important;
-  justify-content: flex-start !important;
-  align-items: center !important;
+.rag-tracks {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  grid-auto-flow: row !important;
+  grid-template-columns: 1fr !important;
 }
 
-/* Fix track number column — don't stretch or center */
-.rag-tracks .track-number,
-.rag-tracks .rag-track-number,
-.rag-tracks .col-auto:first-child {
-  flex: 0 0 auto !important;
-  text-align: right !important;
-  min-width: 28px !important;
-  max-width: 28px !important;
+.rag-tracks > * {
+  width: 100% !important;
 }
 
-/* Give song title column maximum space, prevent truncation */
-.rag-tracks .track-title,
-.rag-tracks .rag-track-title,
-.rag-tracks .col:not(.col-auto),
-.rag-tracks .item-name,
-.rag-tracks .title-text {
-  flex: 1 1 0 !important;
-  min-width: 0 !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-  text-align: left !important;
-}
-
-/* c-listitem-short: song title takes full remaining width */
-.rag-tracks .c-listitem-short .item-title,
-.rag-tracks .c-listitem-short .song-title,
-.rag-tracks .c-listitem-short > *:nth-child(3) {
-  flex: 1 1 0 !important;
-  min-width: 0 !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-}
 
 
 /* ==========================================================================

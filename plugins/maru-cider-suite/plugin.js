@@ -112,9 +112,10 @@ async function fetchFullRomaji(japaneseText) {
 
   const promise = (async () => {
     try {
-      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=ja&tl=en&dt=rm&q=${encodeURIComponent(trimmed)}`;
+      // Use clients5 dict-chrome-ex endpoint which is open, fast, and does NOT bot-block/captcha
+      const url = `https://clients5.google.com/translate_a/single?client=dict-chrome-ex&sl=ja&tl=en&dt=rm&q=${encodeURIComponent(trimmed)}`;
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000);
+      const timeoutId = setTimeout(() => controller.abort(), 4500);
       const res = await fetch(url, { signal: controller.signal });
       clearTimeout(timeoutId);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -132,6 +133,19 @@ async function fetchFullRomaji(japaneseText) {
       romaji = romaji.trim();
       if (!romaji) {
         romaji = transliterateKanaOnly(trimmed);
+      } else {
+        // Normalize macrons to natural Hepburn digraphs
+        romaji = romaji
+          .replace(/ō/g, 'ou')
+          .replace(/Ō/g, 'Ou')
+          .replace(/ū/g, 'uu')
+          .replace(/Ū/g, 'Uu')
+          .replace(/ā/g, 'aa')
+          .replace(/Ā/g, 'Aa')
+          .replace(/ē/g, 'ee')
+          .replace(/Ē/g, 'Ee')
+          .replace(/ī/g, 'ii')
+          .replace(/Ī/g, 'Ii');
       }
 
       romajiCache.set(trimmed, romaji);
@@ -902,10 +916,17 @@ class MaruSuite {
         }
       });
 
-      // 3. Fix Replay Artwork CDN crop bug (replace SHT.AMTPPS01 crop with bb)
-      document.querySelectorAll('.powerswoosh img, .plattered-artwork img').forEach(img => {
-        if (img.src && img.src.includes('SHT.AMTPPS01')) {
-          img.src = img.src.replace('SHT.AMTPPS01', 'bb');
+      // 3. Convert powerswoosh & plattered portrait artwork to 1:1 square cover (bb.webp)
+      document.querySelectorAll('.powerswoosh img, .plattered-artwork img, .powerswoosh-artwork img').forEach(img => {
+        if (img.src) {
+          if (img.src.includes('SHT.AMTPPS01')) {
+            img.src = img.src.replace('SHT.AMTPPS01', 'bb');
+          }
+          if (/\/\d+x\d+sr\.(?:webp|png|jpg)/.test(img.src)) {
+            img.src = img.src.replace(/\/\d+x\d+sr\.(webp|png|jpg)/, '/600x600bb.$1');
+          } else if (img.src.includes('.sr.')) {
+            img.src = img.src.replace('.sr.', '.bb.');
+          }
         }
       });
 
@@ -917,8 +938,6 @@ class MaruSuite {
       }
 
       // 5. Hide the monthly "Your [Month] Replay here." card from the Replay shelf
-      //    Yearly cards have text like "Replay '26", "Replay All Time" — safe to keep.
-      //    Monthly card always has "Replay here." or "your ... replay here" pattern.
       document.querySelectorAll('.powerswoosh').forEach(card => {
         const chin = card.querySelector('.powerswoosh-chin, .powerswoosh-lockup-detail');
         const text = (chin ? chin.textContent : card.textContent) || '';
@@ -929,6 +948,21 @@ class MaruSuite {
           card.style.setProperty('padding', '0', 'important');
           card.style.setProperty('margin', '0', 'important');
           card.style.setProperty('overflow', 'hidden', 'important');
+        }
+      });
+
+      // 6. Automatically purge in-album / in-playlist search button
+      document.querySelectorAll('#app-scroll-bounds button, #app-scroll-bounds .q-btn, #app-scroll-bounds .c-btn, #app-scroll-bounds [role="button"]').forEach(btn => {
+        if (!btn.closest('.chrome-top, aside, .q-drawer, .q-footer, #player-bar, .command-center, .search-box_container, .search-widget')) {
+          const txt = (btn.getAttribute('aria-label') || btn.getAttribute('title') || btn.className || '').toLowerCase();
+          const hasSearchIcon = btn.querySelector('[name*="search" i], [icon*="search" i], svg[data-icon*="search" i], .q-icon[name*="search" i]');
+          if (txt.includes('search') || hasSearchIcon) {
+            btn.style.setProperty('display', 'none', 'important');
+            const parent = btn.closest('.tracklist-toolbar, .in-page-search, .search-container');
+            if (parent && !parent.closest('aside, .q-drawer, .chrome-top')) {
+              parent.style.setProperty('display', 'none', 'important');
+            }
+          }
         }
       });
     };
