@@ -402,24 +402,145 @@ input[type="search"] {
   align-items: center !important;
 }
 
+.item-shelf {
+  contain-intrinsic-block-size: auto 340px !important;
+}
+
+.mediaitem-shelf-content {
+  align-items: center !important;
+  min-height: 295px !important;
+  gap: 16px !important;
+  padding-block: 16px !important;
+}
+
 .ri-shelf-item {
   position: relative !important;
   display: block !important;
-  width: 270px !important;
-  height: 270px !important;
-  border: none !important;
+  width: 260px !important;
+  height: 260px !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
   box-shadow: none !important;
   background: transparent !important;
   outline: none !important;
   overflow: hidden !important;
+  border-radius: 0px !important;
+  box-sizing: border-box !important;
+  transition: transform 140ms cubic-bezier(0.1, 0.9, 0.2, 1), box-shadow 140ms ease, filter 140ms ease, border-color 140ms ease !important;
 }
 
+/* Standard Album Cards (Bigger 260px square tiles & Sharp Corners) */
 .mediaitem-card,
-.mediaitem-grid .mediaitem-card {
-  border: none !important;
+.mediaitem-shelf-content .mediaitem-card,
+.item-shelf .mediaitem-card {
+  --sizeVw: 260px !important;
+  --maxSize: 280px !important;
+  --minSize: 240px !important;
+  width: 260px !important;
+  height: 260px !important;
+  min-width: 260px !important;
+  max-width: 260px !important;
+  min-height: 260px !important;
+  max-height: 260px !important;
+  flex: 0 0 260px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  border-radius: 0px !important;
+  display: inline-block !important;
+  box-sizing: border-box !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background-color: #1a1a1a !important;
   box-shadow: none !important;
-  background: transparent !important;
   outline: none !important;
+  transition: transform 140ms cubic-bezier(0.1, 0.9, 0.2, 1), box-shadow 140ms ease, filter 140ms ease, border-color 140ms ease !important;
+}
+
+/* Library Grid View for Albums & Playlists */
+.mediaitem-grid .mediaitem-card {
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1 !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  flex: 1 1 auto !important;
+}
+
+/* Artwork fills entire 260px card */
+.mediaitem-card .artworkContainer,
+.mediaitem-card .artworkLockup,
+.mediaitem-card .mediaitem-artwork-container {
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  min-height: 100% !important;
+  max-height: 100% !important;
+  position: relative !important;
+  border-radius: 0px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+}
+
+.mediaitem-card .artworkContainer img,
+.mediaitem-card .artworkLockup img,
+.mediaitem-card .artworkContainer canvas,
+.mediaitem-card .artworkLockup canvas,
+.mediaitem-card img,
+.mediaitem-card canvas {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 0px !important;
+  display: block !important;
+}
+
+/* Embedded Progressive Black Title Overlay inside Album Tiles (MediaItem) */
+.mediaitem-card .info-section {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 5 !important;
+  padding: 38px 14px 12px 14px !important;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.96) 0%, rgba(0, 0, 0, 0.72) 48%, rgba(0, 0, 0, 0.3) 80%, transparent 100%) !important;
+  pointer-events: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-end !important;
+  margin: 0 !important;
+  max-width: 100% !important;
+  border-radius: 0px !important;
+  box-sizing: border-box !important;
+}
+
+.mediaitem-card .info-section *,
+.mediaitem-card .item-name,
+.mediaitem-card .artistLink {
+  color: #ffffff !important;
+  pointer-events: auto !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9) !important;
+}
+
+.mediaitem-card .item-name {
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  line-height: 1.25 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  white-space: normal !important;
+}
+
+.mediaitem-card .artistLink {
+  font-size: 11.5px !important;
+  opacity: 0.82 !important;
+  margin-top: 3px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 /* Sharp, uniform square artwork tiles */
@@ -450,7 +571,7 @@ input[type="search"] {
   margin-bottom: 0px !important;
 }
 
-/* Progressive Black Title Overlay inside Album Tiles */
+/* Progressive Black Title Overlay inside Rich Shelf Tiles */
 .ri-shelf-details {
   position: absolute !important;
   bottom: 0 !important;
@@ -493,49 +614,59 @@ input[type="search"] {
 }
 
 /* Windows 10 Reveal Highlight: light spotlights near mouse cursor */
+.mediaitem-card::before,
 .shelf-artwork::before,
 .ri-shelf-artwork::before,
 .powerswoosh::before,
-.category-brick::before {
+.category-brick::before,
+.brick-item-container::before {
   content: "" !important;
   position: absolute !important;
   inset: 0 !important;
   pointer-events: none !important;
-  background: radial-gradient(circle 140px at var(--mouse-x, -999px) var(--mouse-y, -999px), rgba(255, 255, 255, 0.22), transparent 75%) !important;
+  background: radial-gradient(circle 140px at var(--mouse-x, -999px) var(--mouse-y, -999px), rgba(255, 255, 255, 0.24), transparent 75%) !important;
   opacity: 0 !important;
   transition: opacity 120ms ease !important;
   z-index: 6 !important;
 }
 
+.mediaitem-card:hover::before,
 .shelf-artwork:hover::before,
 .ri-shelf-artwork:hover::before,
 .powerswoosh:hover::before,
 .category-brick:hover::before,
+.brick-item-container:hover::before,
 .ri-shelf-item:hover .ri-shelf-artwork::before {
   opacity: 1 !important;
 }
 
 /* Tactile 3px lift on hover */
+.mediaitem-card:hover,
 .shelf-artwork:hover,
 .item-artwork:hover,
 .artwork-container:hover,
+.ri-shelf-item:hover,
 .ri-shelf-item:hover .shelf-artwork,
 .ri-shelf-item:hover .ri-shelf-artwork,
 .powerswoosh:hover,
-.category-brick:hover {
+.category-brick:hover,
+.brick-item-container:hover {
   transform: translateY(-3px) !important;
-  border-color: var(--w10-border-hover) !important;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.25) !important;
+  border-color: var(--w10-border-hover, rgba(255, 255, 255, 0.38)) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65), inset 0 0 0 1px rgba(255, 255, 255, 0.28) !important;
   filter: brightness(1.08) !important;
 }
 
+.mediaitem-card:active,
 .shelf-artwork:active,
 .item-artwork:active,
 .artwork-container:active,
+.ri-shelf-item:active,
 .ri-shelf-item:active .shelf-artwork,
 .ri-shelf-item:active .ri-shelf-artwork,
 .powerswoosh:active,
-.category-brick:active {
+.category-brick:active,
+.brick-item-container:active {
   transform: translateY(0px) scale(0.99) !important;
   filter: brightness(0.96) !important;
 }
@@ -815,18 +946,29 @@ body.body--dark .chrome-top.has-scrolled-title,
 }
 
 /* ==========================================================================
-   13. HIDE IN-ALBUM / IN-PLAYLIST SEARCH
+   13. HIDE IN-ALBUM / IN-PLAYLIST SEARCH & PRESERVE MAIN SEARCH BAR
    ========================================================================== */
-.chrome-search,
-.chrome-search-input,
-[data-v-61575f25],
+/* Keep Main Top-Left Search Bar Fully Intact */
+.sidebar-widget.search-widget,
+.search-widget,
+.search-box_container,
+.search-box_container .search-box,
+.search-box_container .search-button,
+aside .search-widget,
+.q-drawer .search-widget,
+#_top-search {
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+/* Hide only in-album / in-playlist track search button/bar */
 .tracklist-toolbar .chrome-search,
+.tracklist-toolbar input,
+.tracklist-toolbar button:has([name*="search" i]),
 .track-search,
 .in-page-search,
-.search-widget,
-#app-scroll-bounds button[aria-label*="search" i],
-#app-scroll-bounds .q-btn[aria-label*="search" i],
-.playlist-header-container button:has(svg),
 .rag-header button:has([name*="search" i]),
 .rag-header button:has(svg) {
   display: none !important;
@@ -850,6 +992,9 @@ body.body--dark .chrome-top.has-scrolled-title,
 .lockupControls[data-v-e77cc759],
 .lockupControls .menu,
 .lockupControls .play,
+.lockup-controls,
+.artwork-lockup,
+.artwork-lockup-play,
 .ri-shelf-item .lockupControls,
 .ri-shelf-item:hover .lockupControls,
 .ri-shelf-item:hover .lockupControls[data-v-3ce36cc0],
@@ -857,8 +1002,13 @@ body.body--dark .chrome-top.has-scrolled-title,
 .powerswoosh:hover .controls,
 .powerswoosh .controls-container,
 .powerswoosh:hover .controls-container,
+.powerswoosh .c-btn,
+.powerswoosh button[aria-label*="menu" i],
+.powerswoosh button[aria-label*="play" i],
 .mediaitem-card .controls,
 .mediaitem-card .lockupControls,
+.mediaitem-card .lockup-controls,
+.mediaitem-card .c-btn,
 [data-v-2a9a9088],
 cider-lockup-controls {
   display: none !important;

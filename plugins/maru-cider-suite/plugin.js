@@ -853,11 +853,11 @@ class MaruSuite {
   }
 
   /* --------------------------------------------------------------------------
-     FEATURE 4: HIDE PLAYLIST / ALBUM HEADER PILLS
+     FEATURE 4: HIDE PLAYLIST / ALBUM HEADER PILLS & TILE CONTROLS
      -------------------------------------------------------------------------- */
   setupPillRemover() {
     const purgePills = () => {
-      // 1. Selector-based hiding
+      // 1. Selector-based hiding (safeguarding sidebar search and drawer)
       const selectors = [
         '.smart-meta',
         '.smart-meta__pill',
@@ -870,16 +870,18 @@ class MaruSuite {
         '.container-detail .item-tags',
         '[sfc-name="Playlist"] .smart-meta',
         '[sfc-name="Playlist"] .meta-chip',
-        '.chrome-search',
-        '.chrome-search-input',
+        '.tracklist-toolbar .chrome-search',
         '.lockupControls',
+        '.lockup-controls',
         '.controls',
         '.controls-container',
+        '.artwork-lockup',
+        '.artwork-lockup-play',
         '[data-v-2a9a9088]'
       ];
       selectors.forEach(sel => {
         document.querySelectorAll(sel).forEach(el => {
-          if (!el.closest('.settings, aside, .q-drawer, .q-footer, #player-bar')) {
+          if (!el.closest('.settings, aside, .q-drawer, .q-footer, #player-bar, .sidebar-widget, .search-box_container')) {
             el.style.setProperty('display', 'none', 'important');
           }
         });
@@ -907,16 +909,12 @@ class MaruSuite {
         }
       });
 
-      // 4. Hide in-playlist track search button [Q]
-      document.querySelectorAll('#app-scroll-bounds button, #app-scroll-bounds .q-btn, #app-scroll-bounds .c-btn').forEach(btn => {
-        if (!btn.closest('.chrome-top, aside, .q-footer, #player-bar, .command-center, .search-box')) {
-          const txt = (btn.getAttribute('aria-label') || btn.getAttribute('title') || '').toLowerCase();
-          const hasSearchIcon = btn.querySelector('[name*="search" i], [icon*="search" i], svg[data-icon*="search" i]');
-          if (txt.includes('search') || hasSearchIcon) {
-            btn.style.setProperty('display', 'none', 'important');
-          }
-        }
-      });
+      // 4. Ensure sidebar search bar is always visible
+      const sidebarSearch = document.querySelector('.sidebar-widget.search-widget, .search-box_container');
+      if (sidebarSearch) {
+        sidebarSearch.style.removeProperty('display');
+        sidebarSearch.style.setProperty('display', 'flex', 'important');
+      }
     };
 
     purgePills();
@@ -928,11 +926,21 @@ class MaruSuite {
      -------------------------------------------------------------------------- */
   setupRevealHighlight() {
     window.addEventListener('pointermove', (e) => {
-      const tile = e.target.closest('.shelf-artwork, .ri-shelf-artwork, .powerswoosh, .category-brick, .ri-shelf-item, .item-artwork');
+      const tile = e.target.closest(
+        '.mediaitem-card, .artworkContainer, .artworkLockup, .shelf-artwork, .ri-shelf-artwork, .powerswoosh, .category-brick, .ri-shelf-item, .item-artwork, .brick-item-container'
+      );
       if (tile) {
         const rect = tile.getBoundingClientRect();
         tile.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
         tile.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+
+        // Propagate coordinates to parent card if cursor was over an inner element
+        const parentCard = tile.closest('.mediaitem-card, .ri-shelf-item, .powerswoosh');
+        if (parentCard && parentCard !== tile) {
+          const pRect = parentCard.getBoundingClientRect();
+          parentCard.style.setProperty('--mouse-x', `${e.clientX - pRect.left}px`);
+          parentCard.style.setProperty('--mouse-y', `${e.clientY - pRect.top}px`);
+        }
       }
     }, { passive: true });
   }
