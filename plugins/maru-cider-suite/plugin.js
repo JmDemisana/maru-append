@@ -922,7 +922,7 @@ class MaruSuite {
         sidebarSearch.style.setProperty('display', 'flex', 'important');
       }
 
-      // 5. Hide the monthly "Your [Month] Replay here." card from the Replay shelf
+      // 5. Hide the monthly "Your [Month] Replay here." card and handle portrait backdrop
       document.querySelectorAll('.powerswoosh').forEach(card => {
         const chin = card.querySelector('.powerswoosh-chin, .powerswoosh-lockup-detail');
         const text = (chin ? chin.textContent : card.textContent) || '';
@@ -933,6 +933,20 @@ class MaruSuite {
           card.style.setProperty('padding', '0', 'important');
           card.style.setProperty('margin', '0', 'important');
           card.style.setProperty('overflow', 'hidden', 'important');
+          return;
+        }
+
+        const img = card.querySelector('.powerswoosh-artwork img, .plattered-artwork img, img');
+        if (img && img.naturalWidth && img.naturalHeight) {
+          if (img.naturalHeight > img.naturalWidth * 1.05) {
+            const src = img.currentSrc || img.src;
+            if (src) {
+              card.style.setProperty('--card-backdrop', `url("${src}")`);
+              card.classList.add('has-portrait-backdrop');
+            }
+          } else {
+            card.classList.remove('has-portrait-backdrop');
+          }
         }
       });
 
