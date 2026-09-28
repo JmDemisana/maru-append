@@ -760,14 +760,15 @@ input[type="search"],
 }
 
 /* Chin: Progressive Black Overlay (Windows 10 Metro Tile) */
-.powerswoosh .powerswoosh-chin,
-.powerswoosh .powerswoosh-lockup-detail {
+.powerswoosh .powerswoosh-chin {
   position: absolute !important;
   bottom: 0 !important;
   left: 0 !important;
   right: 0 !important;
+  width: 100% !important;
   z-index: 5 !important;
-  padding: 55px 14px 13px 14px !important;
+  padding: 68px 14px 13px 14px !important;
+  margin: 0 !important;
   background: linear-gradient(
     to top,
     rgba(0, 0, 0, 0.98) 0%,
@@ -779,9 +780,29 @@ input[type="search"],
   display: flex !important;
   flex-direction: column !important;
   justify-content: flex-end !important;
+  height: auto !important;
   max-height: none !important;
   box-sizing: border-box !important;
 }
+
+/* Clear all inner child containers so they don't have backgrounds, paddings, or margins */
+.powerswoosh .powerswoosh-detail,
+.powerswoosh .powerswoosh-lockup-detail {
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: none !important;
+  position: static !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.powerswoosh .powerswoosh-chin-artwork {
+  display: none !important;
+}
+
 
 .powerswoosh .powerswoosh-chin *,
 .powerswoosh .powerswoosh-lockup-detail * {
