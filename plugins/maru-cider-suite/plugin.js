@@ -272,7 +272,12 @@ body.body--dark .chrome-top.has-scrolled-title,
 .tracklist-toolbar .chrome-search,
 .track-search,
 .in-page-search,
-.search-widget {
+.search-widget,
+#app-scroll-bounds button[aria-label*="search" i],
+#app-scroll-bounds .q-btn[aria-label*="search" i],
+.playlist-header-container button:has(svg),
+.rag-header button:has([name*="search" i]),
+.rag-header button:has(svg) {
   display: none !important;
   opacity: 0 !important;
   pointer-events: none !important;
@@ -309,8 +314,24 @@ cider-lockup-controls {
   visibility: hidden !important;
 }
 
-/* Shelf containers must be clean with NO borders or backgrounds */
-.ri-shelf-item,
+/* Bigger album shelves */
+.ri-shelf {
+  height: 310px !important;
+  align-items: center !important;
+}
+
+.ri-shelf-item {
+  position: relative !important;
+  display: block !important;
+  width: 270px !important;
+  height: 270px !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  outline: none !important;
+  overflow: hidden !important;
+}
+
 .mediaitem-card,
 .mediaitem-grid .mediaitem-card {
   border: none !important;
@@ -339,7 +360,80 @@ cider-lockup-controls {
   transition: transform 140ms cubic-bezier(0.1, 0.9, 0.2, 1), box-shadow 140ms ease, filter 140ms ease, border-color 140ms ease !important;
 }
 
-/* Tactile 3px lift on hover - strictly on the artwork tile */
+.ri-shelf-item .shelf-artwork,
+.ri-shelf-item .ri-shelf-artwork {
+  width: 100% !important;
+  height: 100% !important;
+  position: relative !important;
+  margin-bottom: 0px !important;
+}
+
+/* Progressive Black Title Overlay inside Album Tiles */
+.ri-shelf-details {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 5 !important;
+  padding: 38px 14px 12px 14px !important;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.96) 0%, rgba(0, 0, 0, 0.72) 48%, rgba(0, 0, 0, 0.3) 80%, transparent 100%) !important;
+  pointer-events: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-end !important;
+}
+
+.ri-shelf-details .item-name,
+.ri-shelf-details .artistLink,
+.ri-shelf-details * {
+  color: #ffffff !important;
+  pointer-events: auto !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9) !important;
+}
+
+.ri-shelf-details .item-name {
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  line-height: 1.25 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+
+.ri-shelf-details .artistLink {
+  font-size: 11.5px !important;
+  opacity: 0.82 !important;
+  margin-top: 3px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Windows 10 Reveal Highlight: light spotlights near mouse cursor */
+.shelf-artwork::before,
+.ri-shelf-artwork::before,
+.powerswoosh::before,
+.category-brick::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  background: radial-gradient(circle 140px at var(--mouse-x, -999px) var(--mouse-y, -999px), rgba(255, 255, 255, 0.22), transparent 75%) !important;
+  opacity: 0 !important;
+  transition: opacity 120ms ease !important;
+  z-index: 6 !important;
+}
+
+.shelf-artwork:hover::before,
+.ri-shelf-artwork:hover::before,
+.powerswoosh:hover::before,
+.category-brick:hover::before,
+.ri-shelf-item:hover .ri-shelf-artwork::before {
+  opacity: 1 !important;
+}
+
+/* Tactile 3px lift on hover */
 .shelf-artwork:hover,
 .item-artwork:hover,
 .artwork-container:hover,
@@ -372,6 +466,36 @@ cider-lockup-controls {
 .category-brick img {
   border-radius: 0px !important;
 }
+
+/* Zero Blur & Player Title Expansion */
+cider-lcdplayer-glass,
+.lcd-player-glass {
+  background: #181818 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.lcdplayer-info,
+.lcdplayer-info[data-v-e06d297a],
+.lcdplayer-info .amp-lcd-container,
+.player-info,
+.c-metadata,
+.c-metadata .metadata-text {
+  max-width: 580px !important;
+  width: auto !important;
+}
+
+.c-metadata .song-name,
+.c-metadata .release-info {
+  max-width: 520px !important;
+}
+
+.c-metadata.title-overflows .song-name,
+.c-metadata.subtitle-overflows .release-info {
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+}
+
 
 
 /* Fix Replay & Plattered Artwork Alignment */
@@ -420,6 +544,7 @@ class MaruSuite {
     this.setupRomajiLyrics();
     this.setupPlaybackWatcher();
     this.setupPillRemover();
+    this.setupRevealHighlight();
     document.documentElement.dataset.maruPlugin = 'active';
   }
 
@@ -781,10 +906,35 @@ class MaruSuite {
           img.src = img.src.replace('SHT.AMTPPS01', 'bb');
         }
       });
+
+      // 4. Hide in-playlist track search button [Q]
+      document.querySelectorAll('#app-scroll-bounds button, #app-scroll-bounds .q-btn, #app-scroll-bounds .c-btn').forEach(btn => {
+        if (!btn.closest('.chrome-top, aside, .q-footer, #player-bar, .command-center, .search-box')) {
+          const txt = (btn.getAttribute('aria-label') || btn.getAttribute('title') || '').toLowerCase();
+          const hasSearchIcon = btn.querySelector('[name*="search" i], [icon*="search" i], svg[data-icon*="search" i]');
+          if (txt.includes('search') || hasSearchIcon) {
+            btn.style.setProperty('display', 'none', 'important');
+          }
+        }
+      });
     };
 
     purgePills();
     setInterval(purgePills, 300);
+  }
+
+  /* --------------------------------------------------------------------------
+     FEATURE 5: WINDOWS 10 FLUENT REVEAL HIGHLIGHT
+     -------------------------------------------------------------------------- */
+  setupRevealHighlight() {
+    window.addEventListener('pointermove', (e) => {
+      const tile = e.target.closest('.shelf-artwork, .ri-shelf-artwork, .powerswoosh, .category-brick, .ri-shelf-item, .item-artwork');
+      if (tile) {
+        const rect = tile.getBoundingClientRect();
+        tile.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+        tile.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+      }
+    }, { passive: true });
   }
 }
 
