@@ -14,9 +14,6 @@ const romajiCache = new Map();
 // In-flight fetch promises to prevent duplicate network calls
 const pendingFetches = new Map();
 
-// Cache for square album/station artwork URLs
-const squareArtworkCache = new Map();
-const pendingCatalogLookups = new Set();
 
 // Kana to Romaji dictionary for fast instant local lookup
 const KANA_MAP = {
@@ -558,8 +555,6 @@ class MaruSuite {
   init() {
     console.log('[MaruSuite] Initializing Maru Suite plugin...');
     this.injectStyles();
-    this.hookApiRequests();
-    this.refreshArtworkCatalog();
     this.setupDynamicScrollHeader();
     this.setupRomajiLyrics();
     this.setupPlaybackWatcher();
@@ -872,236 +867,6 @@ class MaruSuite {
     setInterval(bindAudioEvents, 2000);
   }
 
-  /* --------------------------------------------------------------------------
-     FEATURE 4: HIDE PLAYLIST / ALBUM HEADER PILLS & TILE CONTROLS
-     -------------------------------------------------------------------------- */
-  formatSquareArtworkUrl(artwork, size = 600) {
-    if (!artwork) return '';
-    const url = typeof artwork === 'string' ? artwork : (artwork.url || '');
-    if (!url) return '';
-    return url
-      .replace('{w}', size)
-      .replace('{h}', size)
-      .replace('{f}', 'webp')
-      .replace('{c}', '')
-      .replace(/\{[a-z]\}/g, '');
-  }
-
-  indexCatalogItem(item) {
-    if (!item || !item.attributes) return;
-    const artwork = item.attributes.artwork;
-    if (!artwork?.url) return;
-
-    const squareUrl = this.formatSquareArtworkUrl(artwork, 600);
-    if (!squareUrl) return;
-
-    const candidates = [
-      item.attributes.name,
-      item.attributes.plainEditorialNotes?.name,
-      item.attributes.plainEditorialNotes?.short,
-      item.id
-    ].filter(Boolean);
-
-    candidates.forEach(name => {
-      const key = name.trim().toLowerCase();
-      if (key) {
-        squareArtworkCache.set(key, squareUrl);
-      }
-    });
-  }
-
-  refreshArtworkCatalog() {
-    try {
-      const pinia = window.CiderApp?.store;
-      if (pinia?._s) {
-        for (const [storeId, store] of pinia._s.entries()) {
-          try {
-            const state = store.$state || store;
-            for (const val of Object.values(state)) {
-              if (Array.isArray(val)) {
-                val.forEach(item => this.indexCatalogItem(item));
-              } else if (val && typeof val === 'object') {
-                if (Array.isArray(val.contents)) {
-                  val.contents.forEach(item => this.indexCatalogItem(item));
-                }
-                if (Array.isArray(val.data)) {
-                  val.data.forEach(item => this.indexCatalogItem(item));
-                }
-                const res = val.resources || val.data?.resources;
-                if (res && typeof res === 'object') {
-                  Object.values(res).forEach(group => {
-                    if (group && typeof group === 'object') {
-                      Object.values(group).forEach(item => this.indexCatalogItem(item));
-                    }
-                  });
-                }
-              }
-            }
-          } catch (e) {}
-        }
-      }
-    } catch (e) {}
-
-    // Query IndexedDB DataStore
-    if (window.CiderApp?.DataStore?.getJSON) {
-      ['home/listen-now', 'home/recently-played', 'home/artist-feed'].forEach(key => {
-        window.CiderApp.DataStore.getJSON(key).then(data => {
-          if (!data) return;
-          ['madeForYou', 'friendsListeningTo', 'recentlyPlayed', 'artistFeed'].forEach(k => {
-            if (Array.isArray(data[k]?.contents)) {
-              data[k].contents.forEach(item => this.indexCatalogItem(item));
-            }
-          });
-          if (Array.isArray(data.contents)) {
-            data.contents.forEach(item => this.indexCatalogItem(item));
-          }
-        }).catch(() => {});
-      });
-    }
-
-    // Harvest from standard square album cards already rendered in DOM (Stations for You, Recently Played, etc.)
-    document.querySelectorAll('.ri-shelf-item, .mediaitem-card, .shelf-item, .artworkContainer').forEach(card => {
-      if (card.closest('.powerswoosh')) return;
-      const texts = Array.from(card.querySelectorAll('.item-name, .artistLink, .title-text, p, span'))
-        .map(el => el.textContent.trim().toLowerCase())
-        .filter(t => t.length > 2);
-      const img = card.querySelector('img');
-      if (img?.src && (img.src.includes('bb.') || img.src.includes('sr.') || /\/\d+x\d+/.test(img.src))) {
-        const squareUrl = img.src.replace(/\/\d+x\d+(?:sr|bb)\./, '/600x600bb.');
-        texts.forEach(t => squareArtworkCache.set(t, squareUrl));
-      }
-    });
-  }
-
-  hookApiRequests() {
-    if (window.CiderApp && window.CiderApp.v3 && !window.CiderApp.v3.__maruCatalogHooked) {
-      const origV3 = window.CiderApp.v3;
-      const self = this;
-      window.CiderApp.v3 = async function(...args) {
-        const res = await origV3.apply(this, args);
-        try {
-          if (res?.data?.resources) {
-            Object.values(res.data.resources).forEach(group => {
-              if (group && typeof group === 'object') {
-                Object.values(group).forEach(item => self.indexCatalogItem(item));
-              }
-            });
-          }
-          if (Array.isArray(res?.data?.data)) {
-            res.data.data.forEach(item => self.indexCatalogItem(item));
-          }
-        } catch (e) {}
-        return res;
-      };
-      window.CiderApp.v3.__maruCatalogHooked = true;
-    }
-  }
-
-  fixPowerswooshArtwork() {
-    this.refreshArtworkCatalog();
-    this.hookApiRequests();
-
-    const debugCards = [];
-
-    document.querySelectorAll('.powerswoosh').forEach(card => {
-      const img = card.querySelector('.powerswoosh-artwork img, .plattered-artwork img, img');
-      if (!img) return;
-
-      // Extract all candidate text lines from chin and card
-      const chin = card.querySelector('.powerswoosh-chin, .powerswoosh-detail, .powerswoosh-lockup-detail') || card;
-      const rawTexts = Array.from(chin.querySelectorAll('p, span, div, a'))
-        .map(el => el.textContent.trim())
-        .filter(t => t.length > 1 && !/^(apple recommends|we recommend|mood for you|new release|made for you|replay)/i.test(t));
-
-      // Add full text fallback
-      if (rawTexts.length === 0) {
-        const full = chin.textContent.trim();
-        if (full) rawTexts.push(full);
-      }
-
-      // Lookup square master artwork across all extracted texts
-      let matchedSquareUrl = null;
-      let matchedKey = null;
-
-      for (const txt of rawTexts) {
-        const norm = txt.toLowerCase();
-        let found = squareArtworkCache.get(norm);
-        if (!found) {
-          for (const [key, url] of squareArtworkCache.entries()) {
-            if (key && (key.includes(norm) || norm.includes(key))) {
-              found = url;
-              break;
-            }
-          }
-        }
-        if (found) {
-          matchedSquareUrl = found;
-          matchedKey = norm;
-          break;
-        }
-      }
-
-      debugCards.push({
-        texts: rawTexts,
-        matched: !!matchedSquareUrl,
-        src: img.src
-      });
-
-      // If square master artwork is found, swap immediately!
-      if (matchedSquareUrl) {
-        if (img.src !== matchedSquareUrl) {
-          img.src = matchedSquareUrl;
-          img.removeAttribute('srcset');
-          img.dataset.maruSquareApplied = '1';
-        }
-        return;
-      }
-
-      // Dynamic fallback: Query Apple Music catalog API via CiderApp.v3
-      const queryTerm = rawTexts.find(t => t.length > 2 && !t.toLowerCase().startsWith('featuring')) || rawTexts[0];
-      if (queryTerm && window.CiderApp?.v3 && !pendingCatalogLookups.has(queryTerm.toLowerCase())) {
-        const queryNorm = queryTerm.toLowerCase();
-        pendingCatalogLookups.add(queryNorm);
-        window.CiderApp.v3('/v1/catalog/$STOREFRONT/search', {
-          term: queryTerm,
-          types: 'stations,playlists,albums',
-          limit: 5
-        }).then(res => {
-          const results = [
-            ...(res?.data?.results?.stations?.data || []),
-            ...(res?.data?.results?.playlists?.data || []),
-            ...(res?.data?.results?.albums?.data || [])
-          ];
-          results.forEach(item => this.indexCatalogItem(item));
-          this.fixPowerswooshArtwork();
-        }).catch(() => {}).finally(() => {
-          setTimeout(() => pendingCatalogLookups.delete(queryNorm), 30000);
-        });
-      }
-
-      // String replacement fallback if URL contains portrait crop tokens
-      if (img.src) {
-        if (img.src.includes('SHT.AMTPPS01')) {
-          img.src = img.src.replace('SHT.AMTPPS01', 'bb');
-        }
-        if (/\/\d+x\d+(?:sr|bb)\./.test(img.src)) {
-          img.src = img.src.replace(/\/\d+x\d+(?:sr|bb)\./, '/600x600bb.');
-        }
-      }
-    });
-
-    // Write diagnostic log if possible
-    try {
-      const io = window.chrome?.webview?.hostObjects?.appIO;
-      if (io?.writeFile && debugCards.length > 0) {
-        io.writeFile(
-          'C:/Users/jmdem/AppData/Local/Packages/CiderCollective.Cider_a6qxe093bx5xj/LocalCache/Roaming/sh.cider.dotnet/maru_debug.json',
-          JSON.stringify({ timestamp: Date.now(), cacheSize: squareArtworkCache.size, cards: debugCards }, null, 2)
-        );
-      }
-    } catch (e) {}
-  }
-
   setupPillRemover() {
     const purgePills = () => {
       // 1. Selector-based hiding (safeguarding sidebar search and drawer)
@@ -1149,8 +914,6 @@ class MaruSuite {
         }
       });
 
-      // 3. Convert powerswoosh & plattered portrait artwork to 1:1 square master cover (bb.webp)
-      this.fixPowerswooshArtwork();
 
       // 4. Ensure sidebar search bar is always visible
       const sidebarSearch = document.querySelector('.sidebar-widget.search-widget, .search-box_container');
