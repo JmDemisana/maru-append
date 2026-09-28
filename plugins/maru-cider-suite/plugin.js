@@ -938,15 +938,12 @@ class MaruSuite {
 
         const img = card.querySelector('.powerswoosh-artwork img, .plattered-artwork img, img');
         if (img && img.naturalWidth && img.naturalHeight) {
-          if (img.naturalHeight > img.naturalWidth * 1.05) {
-            const src = img.currentSrc || img.src;
-            if (src) {
-              card.style.setProperty('--card-backdrop', `url("${src}")`);
-              card.classList.add('has-portrait-backdrop');
-            }
-          } else {
-            card.classList.remove('has-portrait-backdrop');
-          }
+          const ratio = img.naturalWidth / img.naturalHeight;
+          card.style.setProperty('aspect-ratio', `${img.naturalWidth} / ${img.naturalHeight}`, 'important');
+          const calcHeight = Math.round(260 / ratio);
+          card.style.setProperty('height', `${calcHeight}px`, 'important');
+          card.style.setProperty('min-height', `${calcHeight}px`, 'important');
+          card.style.setProperty('max-height', `${calcHeight}px`, 'important');
         }
       });
 

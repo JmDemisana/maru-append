@@ -712,18 +712,24 @@ input[type="search"],
 }
 
 /* ==========================================================================
-   15. POWERSWOOSH: AUTHENTIC WINDOWS 10 260px SQUARE TILES (ZERO CROPPING)
+   15. POWERSWOOSH: SAME WIDTH AS SQUARE ALBUMS (260px), HEIGHT ADJUSTS TO ASPECT RATIO
    (Top Picks for You / Playlists Made for You / Find Your Mood / Replay)
    ========================================================================== */
+.item-shelf:has(.powerswoosh),
+.mediaitem-shelf-content:has(.powerswoosh),
+.shelf:has(.powerswoosh) {
+  min-height: 365px !important;
+  align-items: center !important;
+}
+
 .powerswoosh {
   width: 260px !important;
-  height: 260px !important;
   min-width: 260px !important;
   max-width: 260px !important;
-  min-height: 260px !important;
-  max-height: 260px !important;
   flex: 0 0 260px !important;
-  aspect-ratio: 1 / 1 !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1;
+  align-self: center !important;
   position: relative !important;
   overflow: hidden !important;
   border-radius: 0px !important;
@@ -744,22 +750,6 @@ input[type="search"],
   inset: 0 !important;
   border-radius: 0px !important;
   overflow: hidden !important;
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-}
-
-/* Ambient blurred backdrop for portrait cards (e.g. Poppin'Party, Paramore) */
-.powerswoosh.has-portrait-backdrop .powerswoosh-artwork::before {
-  content: "" !important;
-  position: absolute !important;
-  inset: -20px !important;
-  background-image: var(--card-backdrop) !important;
-  background-size: cover !important;
-  background-position: center !important;
-  filter: blur(24px) brightness(0.65) saturate(1.2) !important;
-  z-index: 0 !important;
-  pointer-events: none !important;
 }
 
 .powerswoosh .powerswoosh-artwork img,
@@ -767,11 +757,9 @@ input[type="search"],
 .powerswoosh img {
   width: 100% !important;
   height: 100% !important;
-  object-fit: contain !important;
+  object-fit: cover !important;
   object-position: center !important;
   border-radius: 0px !important;
-  position: relative !important;
-  z-index: 1 !important;
 }
 
 /* Chin: Progressive Black Overlay (Windows 10 Metro Tile) */
