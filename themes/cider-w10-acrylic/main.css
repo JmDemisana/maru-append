@@ -383,14 +383,28 @@ aside img,
   background: transparent !important;
 }
 
-/* Search input on top left */
+/* Search input on top left — full-width, proper height */
+.search-box_container,
+.search-box_container .search-box,
+.sidebar-widget.search-widget .search-box_container {
+  width: 100% !important;
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+
 .q-field--outlined .q-field__control,
 header input[type="search"],
-input[type="search"] {
+input[type="search"],
+.search-box_container .q-field__control,
+#_top-search {
   border-radius: 0px !important;
   background: rgba(255, 255, 255, 0.04) !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
   color: #ffffff !important;
+  min-height: 32px !important;
+  height: 32px !important;
+  font-size: 13px !important;
+  padding: 0 8px !important;
 }
 
 /* ==========================================================================
@@ -970,12 +984,72 @@ aside .search-widget,
 .track-search,
 .in-page-search,
 .rag-header button:has([name*="search" i]),
-.rag-header button:has(svg) {
+.rag-header button:has(svg),
+/* Aggressive: hide ALL buttons in rag-header except play/shuffle */
+.rag-header > button,
+.rag-header .c-btn:not([aria-label*="Play" i]):not([aria-label*="Shuffle" i]),
+.rag-header .chrome-button:not([aria-label*="Play" i]):not([aria-label*="Shuffle" i]),
+/* The standalone search magnifying glass row below album header */
+.rich-album-grid-details .rag-header ~ .chrome-search,
+.rich-album-grid-details .chrome-search,
+.rich-album-grid-details [class*="search"]:not(.search-box_container):not(#_top-search) {
   display: none !important;
   opacity: 0 !important;
   pointer-events: none !important;
   visibility: hidden !important;
 }
+
+/* ==========================================================================
+   RAG TRACKLIST: Fix Even-Row Centering & Song Name Truncation
+   ========================================================================== */
+/* Force all track rows to left-align, no centering */
+.rag-tracks,
+.rag-tracks > *,
+.rag-tracks .rag-track,
+.rag-tracks .c-listitem-short,
+.rag-tracks [class*="track"],
+.rag-content .rag-tracks,
+rich-album-grid-details .rag-tracks > * {
+  text-align: left !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+}
+
+/* Fix track number column — don't stretch or center */
+.rag-tracks .track-number,
+.rag-tracks .rag-track-number,
+.rag-tracks .col-auto:first-child {
+  flex: 0 0 auto !important;
+  text-align: right !important;
+  min-width: 28px !important;
+  max-width: 28px !important;
+}
+
+/* Give song title column maximum space, prevent truncation */
+.rag-tracks .track-title,
+.rag-tracks .rag-track-title,
+.rag-tracks .col:not(.col-auto),
+.rag-tracks .item-name,
+.rag-tracks .title-text {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  text-align: left !important;
+}
+
+/* c-listitem-short: song title takes full remaining width */
+.rag-tracks .c-listitem-short .item-title,
+.rag-tracks .c-listitem-short .song-title,
+.rag-tracks .c-listitem-short > *:nth-child(3) {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
 
 /* ==========================================================================
    14. REMOVE HOVER CONTROLS (PLAY & MENU BUTTONS ON TILES/CARDS)
