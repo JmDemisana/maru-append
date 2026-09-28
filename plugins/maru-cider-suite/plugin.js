@@ -915,6 +915,22 @@ class MaruSuite {
         sidebarSearch.style.removeProperty('display');
         sidebarSearch.style.setProperty('display', 'flex', 'important');
       }
+
+      // 5. Hide the monthly "Your [Month] Replay here." card from the Replay shelf
+      //    Yearly cards have text like "Replay '26", "Replay All Time" — safe to keep.
+      //    Monthly card always has "Replay here." or "your ... replay here" pattern.
+      document.querySelectorAll('.powerswoosh').forEach(card => {
+        const chin = card.querySelector('.powerswoosh-chin, .powerswoosh-lockup-detail');
+        const text = (chin ? chin.textContent : card.textContent) || '';
+        if (/replay here/i.test(text) || /your\s+\w+\s+replay/i.test(text)) {
+          card.style.setProperty('display', 'none', 'important');
+          card.style.setProperty('width', '0', 'important');
+          card.style.setProperty('min-width', '0', 'important');
+          card.style.setProperty('padding', '0', 'important');
+          card.style.setProperty('margin', '0', 'important');
+          card.style.setProperty('overflow', 'hidden', 'important');
+        }
+      });
     };
 
     purgePills();

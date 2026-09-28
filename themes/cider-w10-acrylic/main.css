@@ -517,8 +517,16 @@ input[type="search"],
   left: 0 !important;
   right: 0 !important;
   z-index: 5 !important;
-  padding: 38px 14px 12px 14px !important;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.96) 0%, rgba(0, 0, 0, 0.72) 48%, rgba(0, 0, 0, 0.3) 80%, transparent 100%) !important;
+  padding: 72px 14px 13px 14px !important;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.98) 0%,
+    rgba(0, 0, 0, 0.93) 20%,
+    rgba(0, 0, 0, 0.78) 42%,
+    rgba(0, 0, 0, 0.45) 65%,
+    rgba(0, 0, 0, 0.12) 85%,
+    transparent 100%
+  ) !important;
   pointer-events: none !important;
   display: flex !important;
   flex-direction: column !important;
@@ -592,8 +600,16 @@ input[type="search"],
   left: 0 !important;
   right: 0 !important;
   z-index: 5 !important;
-  padding: 38px 14px 12px 14px !important;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.96) 0%, rgba(0, 0, 0, 0.72) 48%, rgba(0, 0, 0, 0.3) 80%, transparent 100%) !important;
+  padding: 72px 14px 13px 14px !important;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.98) 0%,
+    rgba(0, 0, 0, 0.93) 20%,
+    rgba(0, 0, 0, 0.78) 42%,
+    rgba(0, 0, 0, 0.45) 65%,
+    rgba(0, 0, 0, 0.12) 85%,
+    transparent 100%
+  ) !important;
   pointer-events: none !important;
   display: flex !important;
   flex-direction: column !important;
@@ -605,7 +621,7 @@ input[type="search"],
 .ri-shelf-details * {
   color: #ffffff !important;
   pointer-events: auto !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9) !important;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 1), 0 2px 12px rgba(0, 0, 0, 0.95) !important;
 }
 
 .ri-shelf-details .item-name {
