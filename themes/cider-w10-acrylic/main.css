@@ -712,21 +712,18 @@ input[type="search"],
 }
 
 /* ==========================================================================
-   15. POWERSWOOSH: NATURAL 3:4 ASPECT RATIO (ZERO CROPPING)
+   15. POWERSWOOSH: SAME SCALE AS SQUARE ALBUMS (260px HEIGHT, 3:4 RATIO)
    (Top Picks for You / Playlists Made for You / Find Your Mood / Replay)
    ========================================================================== */
 .powerswoosh {
+  height: 260px !important;
   aspect-ratio: 3 / 4 !important;
-  --swoosh-floor: 168px;
-  --swoosh-ceil: 280px;
-  --swoosh-ideal: 16cqw;
-  width: clamp(var(--swoosh-floor), var(--swoosh-ideal), var(--swoosh-ceil)) !important;
-  height: auto !important;
-  min-width: unset !important;
-  max-width: unset !important;
-  min-height: unset !important;
-  max-height: unset !important;
-  flex: 0 0 auto !important;
+  width: calc(260px * 3 / 4) !important;
+  min-width: calc(260px * 3 / 4) !important;
+  max-width: calc(260px * 3 / 4) !important;
+  min-height: 260px !important;
+  max-height: 260px !important;
+  flex: 0 0 calc(260px * 3 / 4) !important;
   position: relative !important;
   overflow: hidden !important;
   border-radius: 0px !important;
