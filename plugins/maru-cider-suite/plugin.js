@@ -264,6 +264,125 @@ body.body--dark .chrome-top.has-scrolled-title,
 [sfc-name="Playlist"] .tags {
   display: none !important;
 }
+
+/* Hide In-Album / In-Playlist Search */
+.chrome-search,
+.chrome-search-input,
+[data-v-61575f25],
+.tracklist-toolbar .chrome-search,
+.track-search,
+.in-page-search,
+.search-widget {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+/* Remove Hover Controls (Play & Menu 3-dots on Discovery Station & Cards) */
+.lockupControls,
+.lockupControls .menu,
+.lockupControls .play,
+.lockupControls.no-dim,
+[data-v-3ce36cc0].lockupControls,
+[data-v-e77cc759].lockupControls,
+.ri-shelf-item .lockupControls,
+.powerswoosh .lockupControls,
+.mediaitem-card .lockupControls,
+cider-lockup-controls {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+/* Sharp Consistent Metro Corners */
+.powerswoosh,
+.powerswoosh:before,
+.powerswoosh .powerswoosh-artwork,
+.powerswoosh .powerswoosh-artwork.is-plain-card,
+.powerswoosh .powerswoosh-artwork .artwork,
+.powerswoosh .plattered-artwork,
+.powerswoosh .plattered-artwork-container,
+.powerswoosh .plattered-artwork-container img,
+.powerswoosh .powerswoosh-chin,
+.powerswoosh-chin-artwork,
+.powerswoosh img,
+.ri-shelf-item,
+.ri-shelf-artwork,
+.shelf-artwork,
+.mediaitem-card,
+.mediaitem-card .artworkContainer,
+.mediaitem-card .amac,
+.category-brick,
+.category-brick-artwork,
+.category-brick-artwork .artwork {
+  --itemRadius: 0px !important;
+  --radius: 0px !important;
+  --mediaItemRadiusMedium: 0px !important;
+  --mediaItemRadiusRound: 0px !important;
+  border-radius: 0px !important;
+  corner-shape: unset !important;
+  transition: transform 140ms cubic-bezier(0.1, 0.9, 0.2, 1), box-shadow 140ms ease, filter 140ms ease, border-color 140ms ease !important;
+}
+
+/* Tactile 4px lift + reveal glow + subtle brightness boost on hover */
+.shelf-artwork:hover,
+.item-artwork:hover,
+.artwork-container:hover,
+.ri-shelf-item:hover,
+.ri-shelf-item:hover .shelf-artwork,
+.powerswoosh:hover,
+.category-brick:hover,
+.mediaitem-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.25) !important;
+  filter: brightness(1.08) !important;
+}
+
+.shelf-artwork:active,
+.item-artwork:active,
+.artwork-container:active,
+.ri-shelf-item:active,
+.ri-shelf-item:active .shelf-artwork,
+.powerswoosh:active,
+.category-brick:active,
+.mediaitem-card:active {
+  transform: translateY(0px) scale(0.99) !important;
+  filter: brightness(0.96) !important;
+}
+
+/* Fix Replay & Plattered Artwork Alignment */
+.plattered-artwork {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.plattered-artwork .plattered-artwork-container {
+  width: 100% !important;
+  height: 100% !important;
+  aspect-ratio: unset !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.plattered-artwork .plattered-artwork-container img,
+.plattered-artwork img,
+.powerswoosh .plattered-artwork img,
+.powerswoosh img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  border-radius: 0px !important;
+}
 `;
 
 class MaruSuite {
@@ -603,7 +722,10 @@ class MaruSuite {
         '.container-detail .smart-meta',
         '.container-detail .item-tags',
         '[sfc-name="Playlist"] .smart-meta',
-        '[sfc-name="Playlist"] .meta-chip'
+        '[sfc-name="Playlist"] .meta-chip',
+        '.chrome-search',
+        '.chrome-search-input',
+        '.lockupControls'
       ];
       selectors.forEach(sel => {
         document.querySelectorAll(sel).forEach(el => {
