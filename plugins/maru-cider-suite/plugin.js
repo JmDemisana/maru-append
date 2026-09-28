@@ -14,6 +14,10 @@ const romajiCache = new Map();
 // In-flight fetch promises to prevent duplicate network calls
 const pendingFetches = new Map();
 
+// Cache for square album/station artwork URLs
+const squareArtworkCache = new Map();
+const pendingCatalogLookups = new Set();
+
 // Kana to Romaji dictionary for fast instant local lookup
 const KANA_MAP = {
   'あ': 'a', 'い': 'i', 'う': 'u', 'え': 'e', 'お': 'o',
@@ -554,6 +558,8 @@ class MaruSuite {
   init() {
     console.log('[MaruSuite] Initializing Maru Suite plugin...');
     this.injectStyles();
+    this.hookApiRequests();
+    this.refreshArtworkCatalog();
     this.setupDynamicScrollHeader();
     this.setupRomajiLyrics();
     this.setupPlaybackWatcher();
@@ -869,6 +875,189 @@ class MaruSuite {
   /* --------------------------------------------------------------------------
      FEATURE 4: HIDE PLAYLIST / ALBUM HEADER PILLS & TILE CONTROLS
      -------------------------------------------------------------------------- */
+  formatSquareArtworkUrl(artwork, size = 600) {
+    if (!artwork) return '';
+    const url = typeof artwork === 'string' ? artwork : (artwork.url || '');
+    if (!url) return '';
+    return url
+      .replace('{w}', size)
+      .replace('{h}', size)
+      .replace('{f}', 'webp')
+      .replace('{c}', '')
+      .replace(/\{[a-z]\}/g, '');
+  }
+
+  indexCatalogItem(item) {
+    if (!item || !item.attributes) return;
+    const artwork = item.attributes.artwork;
+    if (!artwork?.url) return;
+
+    const squareUrl = this.formatSquareArtworkUrl(artwork, 600);
+    if (!squareUrl) return;
+
+    const candidates = [
+      item.attributes.name,
+      item.attributes.plainEditorialNotes?.name,
+      item.attributes.plainEditorialNotes?.short,
+      item.id
+    ].filter(Boolean);
+
+    candidates.forEach(name => {
+      const key = name.trim().toLowerCase();
+      if (key) {
+        squareArtworkCache.set(key, squareUrl);
+      }
+    });
+  }
+
+  refreshArtworkCatalog() {
+    try {
+      const pinia = window.CiderApp?.store;
+      if (pinia?._s) {
+        const home = pinia._s.get('home');
+        if (home) {
+          ['madeForYou', 'recentlyPlayed', 'artistFeed', 'friendsListeningTo'].forEach(k => {
+            const list = home[k]?.contents;
+            if (Array.isArray(list)) list.forEach(item => this.indexCatalogItem(item));
+          });
+        }
+        const pageStore = pinia._s.get('pageStore');
+        if (pageStore?.pages) {
+          pageStore.pages.forEach(p => {
+            if (p?.data?.resources) {
+              Object.values(p.data.resources).forEach(group => {
+                if (group && typeof group === 'object') {
+                  Object.values(group).forEach(item => this.indexCatalogItem(item));
+                }
+              });
+            }
+            if (Array.isArray(p?.data?.data)) {
+              p.data.data.forEach(item => this.indexCatalogItem(item));
+            }
+          });
+        }
+      }
+    } catch (e) {}
+
+    // Query IndexedDB DataStore
+    if (window.CiderApp?.DataStore?.getJSON) {
+      window.CiderApp.DataStore.getJSON('home/listen-now').then(data => {
+        if (Array.isArray(data?.madeForYou?.contents)) data.madeForYou.contents.forEach(item => this.indexCatalogItem(item));
+        if (Array.isArray(data?.friendsListeningTo?.contents)) data.friendsListeningTo.contents.forEach(item => this.indexCatalogItem(item));
+      }).catch(() => {});
+    }
+
+    // Harvest from standard square album cards already rendered in DOM (Stations for You, etc.)
+    document.querySelectorAll('.ri-shelf-item, .mediaitem-card, .shelf-item').forEach(card => {
+      const title = card.querySelector('.item-name, .title-text')?.textContent?.trim().toLowerCase();
+      const img = card.querySelector('img');
+      if (title && img?.src) {
+        if (img.src.includes('bb.') || img.src.includes('sr.') || /\/\d+x\d+/.test(img.src)) {
+          const squareUrl = img.src.replace(/\/\d+x\d+(?:sr|bb)\./, '/600x600bb.');
+          squareArtworkCache.set(title, squareUrl);
+        }
+      }
+    });
+  }
+
+  hookApiRequests() {
+    if (window.CiderApp && window.CiderApp.v3 && !window.CiderApp.v3.__maruCatalogHooked) {
+      const origV3 = window.CiderApp.v3;
+      const self = this;
+      window.CiderApp.v3 = async function(...args) {
+        const res = await origV3.apply(this, args);
+        try {
+          if (res?.data?.resources) {
+            Object.values(res.data.resources).forEach(group => {
+              if (group && typeof group === 'object') {
+                Object.values(group).forEach(item => self.indexCatalogItem(item));
+              }
+            });
+          }
+          if (Array.isArray(res?.data?.data)) {
+            res.data.data.forEach(item => self.indexCatalogItem(item));
+          }
+        } catch (e) {}
+        return res;
+      };
+      window.CiderApp.v3.__maruCatalogHooked = true;
+    }
+  }
+
+  fixPowerswooshArtwork() {
+    this.refreshArtworkCatalog();
+    this.hookApiRequests();
+
+    document.querySelectorAll('.powerswoosh').forEach(card => {
+      const img = card.querySelector('.powerswoosh-artwork img, .plattered-artwork img, img');
+      if (!img) return;
+
+      // Extract title from powerswoosh card
+      const titleEl = card.querySelector(
+        '.powerswoosh-title .title-text, .title-text, .powerswoosh-title, .item-name'
+      );
+      const rawTitle = titleEl?.textContent?.trim() || '';
+      const normTitle = rawTitle.toLowerCase();
+      if (!normTitle) return;
+
+      // Lookup square master artwork in cache
+      let squareUrl = squareArtworkCache.get(normTitle);
+      if (!squareUrl) {
+        for (const [key, url] of squareArtworkCache.entries()) {
+          if (key && (key.includes(normTitle) || normTitle.includes(key))) {
+            squareUrl = url;
+            break;
+          }
+        }
+      }
+
+      // If square master artwork is found, swap immediately!
+      if (squareUrl) {
+        if (img.src !== squareUrl) {
+          img.src = squareUrl;
+          img.removeAttribute('srcset');
+          img.dataset.maruSquareApplied = normTitle;
+        }
+        return;
+      }
+
+      // Dynamic fallback: Query Apple Music API via CiderApp.v3 if not in cache
+      if (window.CiderApp?.v3 && !pendingCatalogLookups.has(normTitle)) {
+        pendingCatalogLookups.add(normTitle);
+        window.CiderApp.v3('/v1/catalog/$STOREFRONT/search', {
+          term: rawTitle,
+          types: 'stations,playlists,albums',
+          limit: 3
+        }).then(res => {
+          const results = [
+            ...(res?.data?.results?.stations?.data || []),
+            ...(res?.data?.results?.playlists?.data || []),
+            ...(res?.data?.results?.albums?.data || [])
+          ];
+          results.forEach(item => this.indexCatalogItem(item));
+          const resolved = squareArtworkCache.get(normTitle);
+          if (resolved && img.src !== resolved) {
+            img.src = resolved;
+            img.removeAttribute('srcset');
+            img.dataset.maruSquareApplied = normTitle;
+          }
+        }).catch(() => {}).finally(() => {
+          setTimeout(() => pendingCatalogLookups.delete(normTitle), 30000);
+        });
+      }
+
+      // Fallback string replacement if URL still has portrait crop tokens
+      if (img.src) {
+        if (img.src.includes('SHT.AMTPPS01')) {
+          img.src = img.src.replace('SHT.AMTPPS01', 'bb');
+        }
+        if (/\/\d+x\d+(?:sr|bb)\./.test(img.src)) {
+          img.src = img.src.replace(/\/\d+x\d+(?:sr|bb)\./, '/600x600bb.');
+        }
+      }
+    });
+  }
+
   setupPillRemover() {
     const purgePills = () => {
       // 1. Selector-based hiding (safeguarding sidebar search and drawer)
@@ -916,19 +1105,8 @@ class MaruSuite {
         }
       });
 
-      // 3. Convert powerswoosh & plattered portrait artwork to 1:1 square cover (bb.webp)
-      document.querySelectorAll('.powerswoosh img, .plattered-artwork img, .powerswoosh-artwork img').forEach(img => {
-        if (img.src) {
-          if (img.src.includes('SHT.AMTPPS01')) {
-            img.src = img.src.replace('SHT.AMTPPS01', 'bb');
-          }
-          if (/\/\d+x\d+sr\.(?:webp|png|jpg)/.test(img.src)) {
-            img.src = img.src.replace(/\/\d+x\d+sr\.(webp|png|jpg)/, '/600x600bb.$1');
-          } else if (img.src.includes('.sr.')) {
-            img.src = img.src.replace('.sr.', '.bb.');
-          }
-        }
-      });
+      // 3. Convert powerswoosh & plattered portrait artwork to 1:1 square master cover (bb.webp)
+      this.fixPowerswooshArtwork();
 
       // 4. Ensure sidebar search bar is always visible
       const sidebarSearch = document.querySelector('.sidebar-widget.search-widget, .search-box_container');
