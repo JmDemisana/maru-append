@@ -154,19 +154,44 @@ const CSS_STYLES = `
    MARU SUITE INJECTED STYLES
    ========================================================================== */
 
+.ns-toolbar,
+.ns-toolbar_inline {
+  padding-top: 0px !important;
+  margin-top: 0px !important;
+}
+
 .chrome-top {
   position: relative !important;
+  top: 0px !important;
+  margin-top: 0px !important;
   transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease !important;
 }
 
 /* Chrome Top Acrylic Header Bar when scrolled */
 body.body--dark .chrome-top.has-scrolled-title,
 .body--dark .chrome-top.has-scrolled-title,
-.chrome-top.has-scrolled-title {
+.chrome-top.has-scrolled-title,
+.ns-toolbar.has-scrolled-title,
+.ns-toolbar_inline.has-scrolled-title {
   background-color: #181818 !important;
   background: #181818 !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Seal any hairline gap or bleed above chrome-top up to the physical window edge */
+.chrome-top.has-scrolled-title::before {
+  content: "" !important;
+  position: absolute !important;
+  top: -24px !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 24px !important;
+  background-color: #181818 !important;
+  background: #181818 !important;
+  z-index: 999999 !important;
+  display: block !important;
+  pointer-events: none !important;
 }
 
 .maru-chrome-title {
@@ -265,24 +290,42 @@ class MaruSuite {
     };
 
     const getActiveTitle = () => {
-      // 1. Cider pod-router tabs from localStorage
+      // 1. Check active sidebar item first (Home, New, etc.)
+      const activeNav = document.querySelector(
+        '.navigation-button.active, .ns-sidebar .active, [aria-selected="true"], .q-item--active'
+      );
+      if (activeNav) {
+        const navText = activeNav.textContent?.trim().toLowerCase();
+        if (navText && (navText === 'home' || navText.includes('home') || navText === 'listen now')) {
+          return 'Home';
+        }
+      }
+
+      // 2. Cider pod-router tabs from localStorage
       try {
         const raw = localStorage.getItem('pod-router-tabs');
         const curId = localStorage.getItem('pod-router-current-tab');
         if (raw) {
           const tabs = JSON.parse(raw);
           const tab = (curId ? tabs.find(t => t.id === curId) : null) || tabs[0];
-          if (tab?.title) {
-            const t = tab.title.trim();
-            const ignore = ['Home', 'New', 'Radio', 'Concerts', 'Settings', 'Listen Now', 'Browse'];
-            if (!ignore.includes(t) && !t.startsWith('/') && t.length > 0) {
-              return t;
+          if (tab) {
+            const p = (tab.path || '').toLowerCase();
+            const t = (tab.title || '').trim();
+            // If on Home / Listen Now or if title is 'Maru' / 'Home', return 'Home'
+            if (p === '/am/listen-now' || p === '/am/home' || p === '/' || tab.id === 'home' || t.toLowerCase() === 'maru' || t.toLowerCase() === 'home') {
+              return 'Home';
+            }
+            if (t) {
+              const ignore = ['Settings', 'Concerts'];
+              if (!ignore.includes(t) && !t.startsWith('/') && t.length > 0) {
+                return t;
+              }
             }
           }
         }
       } catch (e) {}
 
-      // 2. Headings in active content view (playlists, albums, artists)
+      // 3. Headings in active content view (playlists, albums, artists)
       const selectors = [
         '.apple-heading',
         '.item-title .title-text',
@@ -297,7 +340,8 @@ class MaruSuite {
         for (const el of els) {
           if (!el.closest('aside, .navigation-drawer, .q-footer, #player-bar, .lyrics, .lyric-view')) {
             const t = el.textContent?.trim();
-            if (t && t.length > 0 && !t.includes('TRACKS') && t !== 'Home' && t !== 'New' && t !== 'Radio') {
+            if (t && t.length > 0 && !t.includes('TRACKS')) {
+              if (t.toLowerCase() === 'maru') return 'Home';
               return t;
             }
           }
@@ -373,9 +417,13 @@ class MaruSuite {
         }
         titleEl.classList.add('visible');
         chromeTop.classList.add('has-scrolled-title');
+        const toolbar = chromeTop.closest('.ns-toolbar, .ns-toolbar_inline') || document.querySelector('.ns-toolbar, .ns-toolbar_inline');
+        if (toolbar) toolbar.classList.add('has-scrolled-title');
       } else {
         titleEl.classList.remove('visible');
         chromeTop.classList.remove('has-scrolled-title');
+        const toolbar = chromeTop.closest('.ns-toolbar, .ns-toolbar_inline') || document.querySelector('.ns-toolbar, .ns-toolbar_inline');
+        if (toolbar) toolbar.classList.remove('has-scrolled-title');
       }
     };
 

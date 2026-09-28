@@ -538,18 +538,43 @@ input[type="range"]::-webkit-slider-thumb {
 /* ==========================================================================
    10. APPLE MUSIC DYNAMIC SCROLL HEADER & LYRICS SUBTITLES
    ========================================================================== */
+.ns-toolbar,
+.ns-toolbar_inline {
+  padding-top: 0px !important;
+  margin-top: 0px !important;
+}
+
 .chrome-top {
   position: relative !important;
+  top: 0px !important;
+  margin-top: 0px !important;
   transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease !important;
 }
 
 body.body--dark .chrome-top.has-scrolled-title,
 .body--dark .chrome-top.has-scrolled-title,
-.chrome-top.has-scrolled-title {
+.chrome-top.has-scrolled-title,
+.ns-toolbar.has-scrolled-title,
+.ns-toolbar_inline.has-scrolled-title {
   background-color: #181818 !important;
   background: #181818 !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Seal any hairline gap or bleed above chrome-top up to the physical window edge */
+.chrome-top.has-scrolled-title::before {
+  content: "" !important;
+  position: absolute !important;
+  top: -24px !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 24px !important;
+  background-color: #181818 !important;
+  background: #181818 !important;
+  z-index: 999999 !important;
+  display: block !important;
+  pointer-events: none !important;
 }
 
 .maru-chrome-title {
