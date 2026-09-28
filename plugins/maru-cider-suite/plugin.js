@@ -196,9 +196,9 @@ body.body--dark .chrome-top.has-scrolled-title,
 
 .maru-chrome-title {
   position: absolute !important;
-  left: 50% !important;
+  left: 124px !important;
   top: 50% !important;
-  transform: translate(-50%, -15px) !important;
+  transform: translateY(-50%) translateX(-8px) !important;
   font-size: 13.5px !important;
   font-weight: 600 !important;
   color: #ffffff !important;
@@ -207,7 +207,8 @@ body.body--dark .chrome-top.has-scrolled-title,
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  max-width: 44vw !important;
+  max-width: 50vw !important;
+  text-align: left !important;
   transition: opacity 180ms ease, transform 180ms cubic-bezier(0.1, 0.9, 0.2, 1) !important;
   z-index: 999999 !important;
   user-select: none !important;
@@ -216,7 +217,7 @@ body.body--dark .chrome-top.has-scrolled-title,
 
 .maru-chrome-title.visible {
   opacity: 1 !important;
-  transform: translate(-50%, -50%) !important;
+  transform: translateY(-50%) translateX(0px) !important;
 }
 
 /* Romaji Lyrics Subtitle */
@@ -256,6 +257,7 @@ class MaruSuite {
     this.injectStyles();
     this.setupDynamicScrollHeader();
     this.setupRomajiLyrics();
+    this.setupPlaybackWatcher();
     document.documentElement.dataset.maruPlugin = 'active';
   }
 
@@ -311,8 +313,8 @@ class MaruSuite {
           if (tab) {
             const p = (tab.path || '').toLowerCase();
             const t = (tab.title || '').trim();
-            // If on Home / Listen Now or if title is 'Maru' / 'Home', return 'Home'
-            if (p === '/am/listen-now' || p === '/am/home' || p === '/' || tab.id === 'home' || t.toLowerCase() === 'maru' || t.toLowerCase() === 'home') {
+            // If on Home / Listen Now or if title is 'Maru' / 'Home' / greeting, return 'Home'
+            if (p === '/am/listen-now' || p === '/am/home' || p === '/' || tab.id === 'home' || t.toLowerCase() === 'maru' || t.toLowerCase() === 'home' || /^good (morning|afternoon|evening)/i.test(t)) {
               return 'Home';
             }
             if (t) {
@@ -341,7 +343,7 @@ class MaruSuite {
           if (!el.closest('aside, .navigation-drawer, .q-footer, #player-bar, .lyrics, .lyric-view')) {
             const t = el.textContent?.trim();
             if (t && t.length > 0 && !t.includes('TRACKS')) {
-              if (t.toLowerCase() === 'maru') return 'Home';
+              if (t.toLowerCase() === 'maru' || t.toLowerCase() === 'listen now' || /^good (morning|afternoon|evening)/i.test(t)) return 'Home';
               return t;
             }
           }
@@ -484,6 +486,83 @@ class MaruSuite {
         delete lineEl.dataset.maruProcessing;
       }
     });
+  }
+
+  /* --------------------------------------------------------------------------
+     FEATURE 3: PLAYBACK STATE WATCHER (ANDROID SINE WAVE SYNC)
+     -------------------------------------------------------------------------- */
+  setupPlaybackWatcher() {
+    const updatePlaybackState = () => {
+      let isPlaying = false;
+
+      // 1. Check HTML5 Audio elements
+      const audios = document.querySelectorAll('audio');
+      for (const a of audios) {
+        if (!a.paused && a.currentTime > 0) {
+          isPlaying = true;
+          break;
+        }
+      }
+
+      // 2. Check Cider PluginKit store
+      if (!isPlaying) {
+        try {
+          const amStore = window.__PLUGINSYS__?.Stores?.appleMusicStore;
+          if (amStore) {
+            if (typeof amStore.isPlaying === 'boolean') {
+              isPlaying = amStore.isPlaying;
+            } else if (typeof amStore.playbackState === 'number') {
+              isPlaying = amStore.playbackState === 2; // 2 = playing
+            }
+          }
+        } catch (e) {}
+      }
+
+      // 3. Check CiderApp MusicKit player
+      if (!isPlaying) {
+        try {
+          const mkPlayer = window.CiderApp?.musicKitStore?.player;
+          if (mkPlayer) {
+            if (typeof mkPlayer.isPlaying === 'boolean') {
+              isPlaying = mkPlayer.isPlaying;
+            } else if (typeof mkPlayer.playbackState === 'number') {
+              isPlaying = mkPlayer.playbackState === 2;
+            }
+          }
+        } catch (e) {}
+      }
+
+      // 4. DOM inspection fallback: look for active pause button in player controls
+      if (!isPlaying) {
+        const pauseBtn = document.querySelector(
+          '.lcdplayer-controls [aria-label*="Pause" i], #player-bar [aria-label*="Pause" i], .lcdplayer-controls [title*="Pause" i], [data-icon*="pause" i], [aria-label*="pause" i]'
+        );
+        if (pauseBtn) {
+          isPlaying = true;
+        }
+      }
+
+      document.body.classList.toggle('maru-music-playing', isPlaying);
+    };
+
+    // Run interval
+    setInterval(updatePlaybackState, 200);
+
+    // Audio element listener binder
+    const bindAudioEvents = () => {
+      const audios = document.querySelectorAll('audio');
+      audios.forEach(audio => {
+        if (audio.dataset.maruBound) return;
+        audio.dataset.maruBound = '1';
+        audio.addEventListener('play', () => updatePlaybackState(), { passive: true });
+        audio.addEventListener('playing', () => updatePlaybackState(), { passive: true });
+        audio.addEventListener('pause', () => updatePlaybackState(), { passive: true });
+        audio.addEventListener('ended', () => updatePlaybackState(), { passive: true });
+      });
+    };
+
+    bindAudioEvents();
+    setInterval(bindAudioEvents, 2000);
   }
 }
 
