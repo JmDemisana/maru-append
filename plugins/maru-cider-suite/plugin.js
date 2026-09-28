@@ -279,16 +279,29 @@ body.body--dark .chrome-top.has-scrolled-title,
   visibility: hidden !important;
 }
 
-/* Remove Hover Controls (Play & Menu 3-dots on Discovery Station & Cards) */
+/* Remove Hover Controls (Play & Menu buttons on Discovery Station & Cards) */
+.controls,
+.controls[data-v-2a9a9088],
+.controls-container,
+.controls-container[data-v-2a9a9088],
+.controls-container .c-btn,
+.controls-container button,
 .lockupControls,
+.lockupControls.no-dim,
+.lockupControls[data-v-3ce36cc0],
+.lockupControls[data-v-e77cc759],
 .lockupControls .menu,
 .lockupControls .play,
-.lockupControls.no-dim,
-[data-v-3ce36cc0].lockupControls,
-[data-v-e77cc759].lockupControls,
 .ri-shelf-item .lockupControls,
-.powerswoosh .lockupControls,
+.ri-shelf-item:hover .lockupControls,
+.ri-shelf-item:hover .lockupControls[data-v-3ce36cc0],
+.powerswoosh .controls,
+.powerswoosh:hover .controls,
+.powerswoosh .controls-container,
+.powerswoosh:hover .controls-container,
+.mediaitem-card .controls,
 .mediaitem-card .lockupControls,
+[data-v-2a9a9088],
 cider-lockup-controls {
   display: none !important;
   opacity: 0 !important;
@@ -296,61 +309,70 @@ cider-lockup-controls {
   visibility: hidden !important;
 }
 
-/* Sharp Consistent Metro Corners */
-.powerswoosh,
-.powerswoosh:before,
-.powerswoosh .powerswoosh-artwork,
-.powerswoosh .powerswoosh-artwork.is-plain-card,
-.powerswoosh .powerswoosh-artwork .artwork,
-.powerswoosh .plattered-artwork,
-.powerswoosh .plattered-artwork-container,
-.powerswoosh .plattered-artwork-container img,
-.powerswoosh .powerswoosh-chin,
-.powerswoosh-chin-artwork,
-.powerswoosh img,
+/* Shelf containers must be clean with NO borders or backgrounds */
 .ri-shelf-item,
-.ri-shelf-artwork,
-.shelf-artwork,
 .mediaitem-card,
-.mediaitem-card .artworkContainer,
-.mediaitem-card .amac,
+.mediaitem-grid .mediaitem-card {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  outline: none !important;
+}
+
+/* Sharp Consistent Metro Corners & Uniform Artwork Tiles */
+.shelf-artwork,
+.item-artwork,
+.artwork-container,
+.artwork,
+.ri-shelf-artwork,
 .category-brick,
 .category-brick-artwork,
-.category-brick-artwork .artwork {
+.powerswoosh {
   --itemRadius: 0px !important;
   --radius: 0px !important;
   --mediaItemRadiusMedium: 0px !important;
   --mediaItemRadiusRound: 0px !important;
   border-radius: 0px !important;
   corner-shape: unset !important;
+  border: var(--w10-border, 1px solid rgba(255, 255, 255, 0.12)) !important;
+  box-shadow: none !important;
   transition: transform 140ms cubic-bezier(0.1, 0.9, 0.2, 1), box-shadow 140ms ease, filter 140ms ease, border-color 140ms ease !important;
 }
 
-/* Tactile 4px lift + reveal glow + subtle brightness boost on hover */
+/* Tactile 3px lift on hover - strictly on the artwork tile */
 .shelf-artwork:hover,
 .item-artwork:hover,
 .artwork-container:hover,
-.ri-shelf-item:hover,
 .ri-shelf-item:hover .shelf-artwork,
+.ri-shelf-item:hover .ri-shelf-artwork,
 .powerswoosh:hover,
-.category-brick:hover,
-.mediaitem-card:hover {
-  transform: translateY(-4px) !important;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.25) !important;
+.category-brick:hover {
+  transform: translateY(-3px) !important;
+  border-color: var(--w10-border-hover, rgba(255, 255, 255, 0.35)) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.25) !important;
   filter: brightness(1.08) !important;
 }
 
 .shelf-artwork:active,
 .item-artwork:active,
 .artwork-container:active,
-.ri-shelf-item:active,
 .ri-shelf-item:active .shelf-artwork,
+.ri-shelf-item:active .ri-shelf-artwork,
 .powerswoosh:active,
-.category-brick:active,
-.mediaitem-card:active {
+.category-brick:active {
   transform: translateY(0px) scale(0.99) !important;
   filter: brightness(0.96) !important;
 }
+
+.shelf-artwork img,
+.item-artwork img,
+.artwork img,
+.q-img__image,
+.powerswoosh img,
+.category-brick img {
+  border-radius: 0px !important;
+}
+
 
 /* Fix Replay & Plattered Artwork Alignment */
 .plattered-artwork {
@@ -725,11 +747,14 @@ class MaruSuite {
         '[sfc-name="Playlist"] .meta-chip',
         '.chrome-search',
         '.chrome-search-input',
-        '.lockupControls'
+        '.lockupControls',
+        '.controls',
+        '.controls-container',
+        '[data-v-2a9a9088]'
       ];
       selectors.forEach(sel => {
         document.querySelectorAll(sel).forEach(el => {
-          if (!el.closest('.settings, aside, .q-drawer')) {
+          if (!el.closest('.settings, aside, .q-drawer, .q-footer, #player-bar')) {
             el.style.setProperty('display', 'none', 'important');
           }
         });
@@ -747,6 +772,13 @@ class MaruSuite {
             el.style.setProperty('display', 'none', 'important');
           }
           el = el.nextElementSibling;
+        }
+      });
+
+      // 3. Fix Replay Artwork CDN crop bug (replace SHT.AMTPPS01 crop with bb)
+      document.querySelectorAll('.powerswoosh img, .plattered-artwork img').forEach(img => {
+        if (img.src && img.src.includes('SHT.AMTPPS01')) {
+          img.src = img.src.replace('SHT.AMTPPS01', 'bb');
         }
       });
     };

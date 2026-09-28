@@ -396,17 +396,25 @@ input[type="search"] {
 /* ==========================================================================
    6. MEDIA TILES & ALBUM SHELVES (TACTILE HOVER LIFT & REVEAL GLOW)
    ========================================================================== */
+/* The shelf container itself must be clean with NO borders or backgrounds */
+.ri-shelf-item,
+.mediaitem-card,
+.mediaitem-grid .mediaitem-card {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  outline: none !important;
+}
+
+/* Sharp, uniform square artwork tiles */
 .shelf-artwork,
 .item-artwork,
 .artwork-container,
 .artwork,
-.ri-shelf-item,
 .ri-shelf-artwork,
-.powerswoosh,
-.powerswoosh-artwork,
 .category-brick,
 .category-brick-artwork,
-.mediaitem-card {
+.powerswoosh {
   --itemRadius: 0px !important;
   --radius: 0px !important;
   --mediaItemRadiusMedium: 0px !important;
@@ -418,29 +426,27 @@ input[type="search"] {
   transition: transform 140ms cubic-bezier(0.1, 0.9, 0.2, 1), box-shadow 140ms ease, filter 140ms ease, border-color 140ms ease !important;
 }
 
-/* Tactile 4px lift + reveal glow + subtle brightness boost on hover */
+/* Tactile 3px lift + reveal glow on hover - strictly on the artwork tile */
 .shelf-artwork:hover,
 .item-artwork:hover,
 .artwork-container:hover,
-.ri-shelf-item:hover,
 .ri-shelf-item:hover .shelf-artwork,
+.ri-shelf-item:hover .ri-shelf-artwork,
 .powerswoosh:hover,
-.category-brick:hover,
-.mediaitem-card:hover {
-  transform: translateY(-4px) !important;
-  border: var(--w10-border-hover) !important;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.25) !important;
+.category-brick:hover {
+  transform: translateY(-3px) !important;
+  border-color: var(--w10-border-hover) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.25) !important;
   filter: brightness(1.08) !important;
 }
 
 .shelf-artwork:active,
 .item-artwork:active,
 .artwork-container:active,
-.ri-shelf-item:active,
 .ri-shelf-item:active .shelf-artwork,
+.ri-shelf-item:active .ri-shelf-artwork,
 .powerswoosh:active,
-.category-brick:active,
-.mediaitem-card:active {
+.category-brick:active {
   transform: translateY(0px) scale(0.99) !important;
   filter: brightness(0.96) !important;
 }
@@ -450,11 +456,10 @@ input[type="search"] {
 .artwork img,
 .q-img__image,
 .powerswoosh img,
-.powerswoosh-artwork img,
-.category-brick img,
-.mediaitem-card img {
+.category-brick img {
   border-radius: 0px !important;
 }
+
 
 
 /* ==========================================================================
@@ -715,15 +720,28 @@ body.body--dark .chrome-top.has-scrolled-title,
 /* ==========================================================================
    14. REMOVE HOVER CONTROLS (PLAY & MENU BUTTONS ON TILES/CARDS)
    ========================================================================== */
+.controls,
+.controls[data-v-2a9a9088],
+.controls-container,
+.controls-container[data-v-2a9a9088],
+.controls-container .c-btn,
+.controls-container button,
 .lockupControls,
+.lockupControls.no-dim,
+.lockupControls[data-v-3ce36cc0],
+.lockupControls[data-v-e77cc759],
 .lockupControls .menu,
 .lockupControls .play,
-.lockupControls.no-dim,
-[data-v-3ce36cc0].lockupControls,
-[data-v-e77cc759].lockupControls,
 .ri-shelf-item .lockupControls,
-.powerswoosh .lockupControls,
+.ri-shelf-item:hover .lockupControls,
+.ri-shelf-item:hover .lockupControls[data-v-3ce36cc0],
+.powerswoosh .controls,
+.powerswoosh:hover .controls,
+.powerswoosh .controls-container,
+.powerswoosh:hover .controls-container,
+.mediaitem-card .controls,
 .mediaitem-card .lockupControls,
+[data-v-2a9a9088],
 cider-lockup-controls {
   display: none !important;
   opacity: 0 !important;
