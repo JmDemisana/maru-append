@@ -281,15 +281,24 @@ body.body--dark .chrome-top.has-scrolled-title,
 }
 
 /* Hide In-Album / In-Playlist Search */
+#app-scroll-bounds .chrome-search,
+#app-scroll-bounds .c-input-search,
+#app-scroll-bounds .tracklist-toolbar,
+#app-scroll-bounds .track-search,
+#app-scroll-bounds .in-page-search,
+#app-scroll-bounds .search-widget,
+#app-scroll-bounds [class*="search"]:not(.search-box_container):not(#_top-search),
+#app-scroll-bounds button:has([name*="search" i]),
+#app-scroll-bounds button:has(svg[data-icon*="search" i]),
 .chrome-search,
 .chrome-search-input,
 [data-v-61575f25],
 .tracklist-toolbar .chrome-search,
 .track-search,
 .in-page-search,
-.search-widget,
-#app-scroll-bounds button[aria-label*="search" i],
-#app-scroll-bounds .q-btn[aria-label*="search" i],
+[sfc-name="Playlist"] .chrome-search,
+[sfc-name="Playlist"] [class*="search"],
+.container-detail .chrome-search,
 .playlist-header-container button:has(svg),
 .rag-header button:has([name*="search" i]),
 .rag-header button:has(svg) {
@@ -297,6 +306,23 @@ body.body--dark .chrome-top.has-scrolled-title,
   opacity: 0 !important;
   pointer-events: none !important;
   visibility: hidden !important;
+}
+
+/* Tracklist Row Stabilization */
+.c-listitem,
+.ri-list-item,
+.tracklist-item,
+.listitem-scaffold .c-listitem,
+.q-virtual-scroll__content > .c-listitem {
+  min-height: 46px !important;
+  height: 46px !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.rag-tracks > * {
+  flex-shrink: 0 !important;
+  min-height: 40px !important;
 }
 
 /* Remove Hover Controls (Play & Menu buttons on Discovery Station & Cards) */
@@ -951,13 +977,19 @@ class MaruSuite {
         }
       });
 
-      // 6. Automatically purge in-album / in-playlist search button
-      document.querySelectorAll('#app-scroll-bounds button, #app-scroll-bounds .q-btn, #app-scroll-bounds .c-btn, #app-scroll-bounds [role="button"]').forEach(btn => {
-        if (!btn.closest('.chrome-top, aside, .q-drawer, .q-footer, #player-bar, .command-center, .search-box_container, .search-widget')) {
-          const txt = (btn.getAttribute('aria-label') || btn.getAttribute('title') || btn.className || '').toLowerCase();
-          const hasSearchIcon = btn.querySelector('[name*="search" i], [icon*="search" i], svg[data-icon*="search" i], .q-icon[name*="search" i]');
-          if (txt.includes('search') || hasSearchIcon) {
+      // 6. Automatically purge in-album / in-playlist search button and inputs
+      document.querySelectorAll(
+        '#app-scroll-bounds .chrome-search, #app-scroll-bounds [class*="search"], #app-scroll-bounds input[type="search"], #app-scroll-bounds .tracklist-toolbar, #app-scroll-bounds button, #app-scroll-bounds .q-btn, #app-scroll-bounds .c-btn, #app-scroll-bounds [role="button"]'
+      ).forEach(btn => {
+        if (!btn.closest('.chrome-top, aside, .q-drawer, .q-footer, #player-bar, .command-center, .search-box_container, .sidebar-widget')) {
+          const txt = (btn.getAttribute('aria-label') || btn.getAttribute('title') || btn.className || btn.textContent || '').toLowerCase();
+          const hasSearchIcon = btn.querySelector && btn.querySelector('[name*="search" i], [icon*="search" i], svg[data-icon*="search" i], .q-icon[name*="search" i]');
+          const isSearchPillOrBar = btn.matches && (btn.matches('.chrome-search, input[type="search"], .tracklist-toolbar, .track-search, .in-page-search, [class*="search"]') || btn.classList?.contains('chrome-search'));
+          if (hasSearchIcon || isSearchPillOrBar || (txt.includes('search') && !txt.includes('add to'))) {
             btn.style.setProperty('display', 'none', 'important');
+            btn.style.setProperty('opacity', '0', 'important');
+            btn.style.setProperty('visibility', 'hidden', 'important');
+            btn.style.setProperty('pointer-events', 'none', 'important');
             const parent = btn.closest('.tracklist-toolbar, .in-page-search, .search-container');
             if (parent && !parent.closest('aside, .q-drawer, .chrome-top')) {
               parent.style.setProperty('display', 'none', 'important');

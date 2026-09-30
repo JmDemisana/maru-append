@@ -316,7 +316,10 @@ aside {
   border-right: var(--w10-border) !important;
 }
 
-.q-item,
+.q-drawer .q-item,
+.navigation-drawer .q-item,
+cider-sidebar .q-item,
+aside .q-item,
 [sfc-name="NavigationButton"],
 .nav-btn {
   margin: 1px 0 !important;
@@ -330,7 +333,10 @@ aside {
 }
 
 /* Sidebar hover nudge: subtle 2px right shift */
-.q-item:hover,
+.q-drawer .q-item:hover,
+.navigation-drawer .q-item:hover,
+cider-sidebar .q-item:hover,
+aside .q-item:hover,
 [sfc-name="NavigationButton"]:hover,
 .nav-btn:hover {
   background-color: var(--w10-surface-hover) !important;
@@ -338,16 +344,22 @@ aside {
   transform: translateX(2px) !important;
 }
 
-.q-item:active,
+.q-drawer .q-item:active,
+.navigation-drawer .q-item:active,
+cider-sidebar .q-item:active,
+aside .q-item:active,
 [sfc-name="NavigationButton"]:active,
 .nav-btn:active {
   transform: translateX(0px) !important;
 }
 
 /* Active navigation item */
-.q-item.q-router-link--active,
-.q-item.active,
-.q-item.q-item--active,
+.q-drawer .q-item.q-router-link--active,
+.q-drawer .q-item.active,
+.q-drawer .q-item.q-item--active,
+.navigation-drawer .q-item.q-item--active,
+cider-sidebar .q-item.q-item--active,
+aside .q-item.q-item--active,
 [sfc-name="NavigationButton"].active {
   background-color: rgba(255, 255, 255, 0.08) !important;
   border-left: 3px solid var(--w10-accent) !important;
@@ -1198,12 +1210,11 @@ body.body--dark .chrome-top.has-scrolled-title,
    ========================================================================== */
 /* Keep Main Top-Left Search Bar Fully Intact */
 .sidebar-widget.search-widget,
-.search-widget,
+aside .search-widget,
+.q-drawer .search-widget,
 .search-box_container,
 .search-box_container .search-box,
 .search-box_container .search-button,
-aside .search-widget,
-.q-drawer .search-widget,
 #_top-search {
   display: flex !important;
   opacity: 1 !important;
@@ -1212,6 +1223,15 @@ aside .search-widget,
 }
 
 /* Hide only in-album / in-playlist track search button/bar */
+#app-scroll-bounds .chrome-search,
+#app-scroll-bounds .c-input-search,
+#app-scroll-bounds .tracklist-toolbar,
+#app-scroll-bounds .track-search,
+#app-scroll-bounds .in-page-search,
+#app-scroll-bounds .search-widget,
+#app-scroll-bounds [class*="search"]:not(.search-box_container):not(#_top-search),
+#app-scroll-bounds button:has([name*="search" i]),
+#app-scroll-bounds button:has(svg[data-icon*="search" i]),
 .tracklist-toolbar .chrome-search,
 .tracklist-toolbar input,
 .tracklist-toolbar button:has([name*="search" i]),
@@ -1219,14 +1239,15 @@ aside .search-widget,
 .in-page-search,
 .rag-header button:has([name*="search" i]),
 .rag-header button:has(svg),
-/* Aggressive: hide ALL buttons in rag-header except play/shuffle */
 .rag-header > button,
 .rag-header .c-btn:not([aria-label*="Play" i]):not([aria-label*="Shuffle" i]),
 .rag-header .chrome-button:not([aria-label*="Play" i]):not([aria-label*="Shuffle" i]),
-/* The standalone search magnifying glass row below album header */
 .rich-album-grid-details .rag-header ~ .chrome-search,
 .rich-album-grid-details .chrome-search,
-.rich-album-grid-details [class*="search"]:not(.search-box_container):not(#_top-search) {
+.rich-album-grid-details [class*="search"]:not(.search-box_container):not(#_top-search),
+[sfc-name="Playlist"] .chrome-search,
+[sfc-name="Playlist"] [class*="search"],
+.container-detail .chrome-search {
   display: none !important;
   opacity: 0 !important;
   pointer-events: none !important;
@@ -1234,18 +1255,27 @@ aside .search-widget,
 }
 
 /* ==========================================================================
-   RAG TRACKLIST: Single Column Stack (Eliminate Even Song Row Stagger)
+   TRACKLIST ROWS & RAG: Full Height, Non-Collapsing Vertical Flow
    ========================================================================== */
+.c-listitem,
+.ri-list-item,
+.tracklist-item,
+.listitem-scaffold .c-listitem,
+.q-virtual-scroll__content > .c-listitem {
+  min-height: 46px !important;
+  height: 46px !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+}
+
 .rag-tracks {
-  display: flex !important;
-  flex-direction: column !important;
   width: 100% !important;
-  grid-auto-flow: row !important;
-  grid-template-columns: 1fr !important;
 }
 
 .rag-tracks > * {
   width: 100% !important;
+  flex-shrink: 0 !important;
+  min-height: 40px !important;
 }
 
 
